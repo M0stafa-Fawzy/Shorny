@@ -182,7 +182,7 @@ deleteAccount()
 
 
 function getClientProfile(){
-    clientRouter.get('/users/profile/:id' , auth , async (req , res) => {
+    clientRouter.get('/users/search/:id' , auth , async (req , res) => {
         try{
             const client = await clients.findById(req.params.id)
             if(!client){
@@ -200,7 +200,7 @@ getClientProfile()
 //it does not work on postman but 
 
 // function getClientProfileByName(){
-//     clientRouter.get('/users/profile/:name' , async (req , res) => {
+//     clientRouter.get('/users/search/:name' , async (req , res) => {
 //         try{
 //             const client = await clients.find({ name : req.params.name })
 //             res.status(200).send(client)
@@ -214,7 +214,7 @@ getClientProfile()
 
 
 function getLawyerProfile(){
-    clientRouter.get('/users/lawyerProfile/:id' , auth , async (req , res) => {
+    clientRouter.get('/users/search/:id' , auth , async (req , res) => {
         try{
             const lawyer = await lawyers.findById(req.params.id)
             if(!lawyer){
@@ -228,130 +228,6 @@ function getLawyerProfile(){
 }
 
 getLawyerProfile()
-
-
-
-// function makeConsultation(){
-//     clientRouter.post('/users/Consultations' , auth , async (req , res) => {
-//         const con = new consultations ({
-//             ...req.body ,
-//             client : req.client._id
-//         })
-//         try{
-//             await con.save()
-//             res.status(201).send(con)
-//         }catch(err){
-//             res.status(400).send(err)
-//         }
-//     })
-// }
-
-// makeConsultation()
-
-
-// function getConsultation(){
-//     clientRouter.get('/users/consultations/:id' , auth , async (req , res) => {
-//         try{
-//         const con = await consultations.findOne({_id : req.params.id , client : req.client._id })
-//         const reps = await replies.find({concultation : req.params.id})
-//         if(!con){
-//             return res.status(404).send()
-//         }
-//         res.send({con,reps})
-//         }catch(err){
-//             res.status(500).send(err)
-//         }
-//     })
-// }
-
-// getConsultation()
-
-
-// function getAllConsultations(){
-//     clientRouter.get('/users/consultations' , auth , async (req , res) => {
-//         try{
-//         //await req.client.populate('concultations').execPopulate()
-//         const cons = await consultations.find({client : req.client._id})
-//         if(!cons){
-//             return res.status(404).send()
-//         }
-//         res.send(cons)
-//         //res.send(req.client.concultations)
-//         }catch(err){
-//             res.status(500).send(err)
-//         }
-//     })
-// }
-
-// getAllConsultations()
-
-
-// function updateConsultation() {
-//     clientRouter.patch('/users/Consultations/:id' , auth , async (req ,res) => {
-//         const updates = Object.keys(req.body)
-//         const allowUpdates = ['law_type' , 'body' , 'title']
-//         const isValidOperation = updates.every((update) => allowUpdates.includes(update))
-    
-//         if(!isValidOperation){
-//             return res.status(400).send({error : 'invalid updates '})
-//         }
-    
-//         try {    
-//             const con = await consultations.findOne({_id : req.params.id , client : req.client._id})
-
-//             if(!con){
-//                 return res.status(404).send()
-//             }
-
-//             updates.forEach((update) => con[update] = req.body[update])
-//             await con.save()
-//             res.send(con) 
-//             }catch (err) {   
-//             res.status(400).send(err) 
-//         }
-//     })
-
-// }
-
-// updateConsultation()
-
-
-// don not use con.remove() method because ther is an warning
-// function deleteConsultation() {
-//     clientRouter.delete('/users/Consultations/:id', auth , async (req , res)=> {
-//         try{
-//             const con = await consultations.findByIdAndDelete({_id : req.params.id , client : req.client._id})
-//             if(!con){
-//                 return res.status(404).send()
-//             }
-//             res.send(con)
-//         }catch(err){
-//             res.status(500).send()
-//         }
-//     })
-// }
-
-// deleteConsultation() 
-
-
-// // don not use con.remove() method because ther is an warning
-// function deleteAllConsultations() {
-//     clientRouter.delete('/users/Consultations', auth , async (req , res)=> {
-//         try{
-//             const cons = await consultations.deleteMany({client : req.client._id})
-//             if(!cons){
-//                 res.status(404).send()
-//             }
-//             res.send(cons)
-//         }catch(err){
-//             res.status(500).send(err)
-//         }
-//     })
-// }
-
-// deleteAllConsultations() 
-
-
 
 
 function assignLawyerToCon(){
@@ -384,6 +260,9 @@ function showAssinedLawyer(){
     clientRouter.get('/users/me/lawyers' , auth , async (req , res) => {
         try{
             const laws = await lawyers.find({_id : req.client.lawyers})
+            if(!laws){
+                return res.status(404).send()
+            }
             res.status(200).send(laws)
         }catch(err){
             res.status(404).send(err)
@@ -393,6 +272,42 @@ function showAssinedLawyer(){
 
 showAssinedLawyer()
 
+
+function rateLawyer(){
+    clientRouter.post('/users/lawyer/:id' , auth , async (req , res) => {
+        try{
+            const lawyer = await lawyers.findById(req.params.id)
+            if(!lawyer){
+                return res.status(404).send()
+            }
+            lawyer.ratting = req.body.ratting
+            await lawyer.save()
+            res.status(200).send(lawyer)
+        }catch(err){
+            res.status(400).send(err)
+        }
+    })
+}
+
+rateLawyer()
+
+function sarchByRate(){
+    clientRouter.get('/users/search/:rate' , auth , async (req , res) => {
+        try{
+            const lawys = await lawyers.find({ratting : req.params.rate})
+            if(!lawys){
+                return res.status(404).send()
+            }
+            res.status(200).send(lawys)
+        }catch(err){
+            res.status(400).send()
+        }
+
+    })
+
+}
+
+sarchByRate()
 
 
 module.exports = clientRouter 

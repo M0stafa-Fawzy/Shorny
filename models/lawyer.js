@@ -42,6 +42,11 @@ const lawyerSchema = new mongoose.Schema({
             }
         }
     } , 
+    address : {
+        type : String , 
+        required : true , 
+        trim : true 
+    } , 
     role : {
         type : String , 
         required : true , 

@@ -24,7 +24,7 @@ app.listen( port, () => {
     console.log("running on port " + port )
 })
 
-// const clients = require('../src/db_models/client')
+const clients = require('../models/client')
 // const lawyers = require('../src/db_models/lawyer')
 
 // const cons = require('../src/db_models/concultation')
@@ -48,8 +48,4 @@ app.listen( port, () => {
 // }
 // any()
 
-// const any = 54221
-// if(typeof any !== 'string'){
-//     console.log("not string")
-// }
 

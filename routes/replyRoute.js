@@ -56,6 +56,9 @@ function deleteReply(){// id belongs to the reply itself
     replyRouter.delete('/replies/:id' , lawyerAuth , async (req , res) => {
         try{
             const rep = await replies.findOne({_id : req.params.id , lawyer : req.lawyer.id})
+            if(!rep){
+                return res.status(404).send()
+            }
             await rep.remove()
             res.status(200).send(rep)
         }catch(err){

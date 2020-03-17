@@ -105,7 +105,7 @@ clientSchema.methods.toJSON = function () {
     const  data = this.toObject()
     delete data.password
     delete data.tokens
-    delete data.tokens2
+    delete data.roleToken
     delete data.profile_picture
     delete data.__v
     delete data.role

@@ -3,7 +3,9 @@ const lawyers = require('../models/lawyer')
 const clients = require('../models/client')
 const concultations = require('../models/consultation')
 const auth = require('../src/middleware/adminAuth')
-const byc = require('bcryptjs')
+const {registerMail , deleteMail} = require('../src/emails/email')
+const multer = require('multer')
+const sharp = require('sharp')
 const express = require('express')
 
 const adminRouter = new express.Router()
@@ -12,15 +14,9 @@ const adminRouter = new express.Router()
 function login(){ // Done
     adminRouter.post('/admins/login' , async (req , res) => {
         try{
-            const admin = await admins.findOne({email : req.body.email})
-            const token = await admin.autnToken()
-            if(!admin){
-                res.status(404).send()
-            }
-            const com = await byc.compare(req.body.password , admin.password)
-            if(req.body.email === admin.email && com == true ){
-                res.status(200).send({ admin , token })
-            }
+            const admin = await admins.findByAlternatives(req.body.email , req.body.password)
+            const token = await admin.authToken()
+            res.status(200).send({ admin , token })
         } catch(err){
             res.send(err)
         }
@@ -28,6 +24,62 @@ function login(){ // Done
 }
 
 login()
+
+
+const upload = multer({
+    limits : {
+        fileSize : 1000000
+    } , fileFilter (req , file , cb) {
+        if(!file.originalname.match(/\.(jpg|jpes|png)$/)){
+            return cb(new Error('picture format not matched , please upload jpg,jpes or png image'))
+        }
+        cb(undefined , true)
+    }
+})
+
+
+function uploadProfilePic(){
+    adminRouter.post('/admins/me/profilepicture' , auth , upload.single('profile pic') , async (req , res) => {
+        const pic = await sharp(req.file.buffer).resize({width : 250 , height : 250}).png().toBuffer()
+        req.admin.profile_picture = pic 
+        await req.admin.save()
+        res.send()
+    } , (error , req , res , next) => {
+        res.status(400).send({error : error.message})
+    })
+} 
+
+uploadProfilePic()
+
+
+function deleteProfilePic(){
+    adminRouter.delete('/admins/me/profilepicture' , auth , async (req , res) => {
+        req.admin.profile_picture = undefined
+        await req.admin.save()
+        res.send()
+    })
+}
+
+deleteProfilePic()
+
+
+function getProfilePic(){
+    adminRouter.get('/admins/:id/profilePic' , async (req , res) => {
+        try{
+            const admin = await admins.findById(req.params.id)
+            if(!admin || !admin.profile_picture){
+                throw new Error()
+            }
+            res.set('Content-Type' , 'image/png')
+            res.send(admin.profile_picture)
+        }catch(err){
+            res.status(400).send(err)
+        }
+    })
+}
+
+getProfilePic()
+
 
 
 function logout(){ // Done
@@ -86,10 +138,12 @@ function updateProfile(){ // Done
 
 updateProfile()
 
+
 function deleteAccount(){ // done
     adminRouter.delete('/admins/me' , auth , async (req , res) => {
         try{
             await req.admin.remove()
+            await deleteMail(req.admin.email , req.admin.name)
             res.send()
         }catch(err){
             res.status(400).send(err)
@@ -122,8 +176,9 @@ function addAdmin(){
     adminRouter.post('/admins/addAdmin' , auth , async (req , res) => {
             try{
                 const admin = new admins(req.body)
-                const token = await admin.autnToken()
-                const roletoken = await admin.autnToken2()
+                await registerMail(admin.email , admin.name)
+                const token = await admin.authToken()
+                const roletoken = await admin.authToken2()
                 await admin.save()
                 res.status(201).send({admin , token , roletoken})
     
@@ -153,35 +208,6 @@ function addUser(){ // done
 addUser()
 
 
-// function updateClient(){ // done
-//     adminRouter.patch('/admins/updateClient/:id' , async (req , res ) => {
-//         const updates = Object.keys(req.body)
-//         const allowUpdates = ['name' , 'ID' , 'phoneNumber' , 'password' , 'email' ]
-//         const isValidOperation = updates.every((update) => allowUpdates.includes(update))
-
-//         if(!isValidOperation){
-//             return res.status(400).send({error : 'invalid updates '})
-//         }
-
-//         try {    
-//             const client = await clients.findById(req.params.id)
-//             updates.forEach((update) => client[update] = req.body[update] )
-//             await client.save()
-
-//             if (!client) {      
-//             return res.status(404).send()     
-//             } 
-    
-//             res.send(client) 
-//             }catch (e) {   
-//             res.status(400).send(e) 
-//         }
-//     })
-// }
-
-// updateClient()
-
-
 function deleteClient(){
     adminRouter.delete('/admins/user/:id' , auth , async (req , res) => {
         try{
@@ -197,6 +223,7 @@ function deleteClient(){
     })
 }
 deleteClient()
+
 
 function showAllClients(){
     adminRouter.get('/admins/users' , auth , async (req , res ) => {
@@ -230,35 +257,6 @@ function addLawyer(){
 }
 
 addLawyer()
-
-
-// function updateLawyer(){
-//     adminRouter.patch('/admins/updateLawyer/:id' , async (req , res ) => {
-//         const updates = Object.keys(req.body)
-//         const allowUpdates = ['name' , 'ID' , 'phoneNumber' , 'password' , 'email' , 'lawyer_type' , 'status' ]
-//         const isValidOperation = updates.every((update) => allowUpdates.includes(update))
-
-//         if(!isValidOperation){
-//             return res.status(400).send({error : 'invalid updates '})
-//         }
-
-//         try {    
-//             const lawyer = await lawyers.findById(req.params.id)
-//             updates.forEach((update) => lawyer[update] = req.body[update] )
-//             await lawyer.save()
-
-//             if (!lawyer) {      
-//             return res.status(404).send()     
-//             } 
-    
-//             res.send(lawyer) 
-//             }catch (e) {   
-//             res.status(400).send(e) 
-//         }
-//     })
-// }
-
-// updateLawyer()
 
 
 

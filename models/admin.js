@@ -10,7 +10,8 @@ const adminSchema = new mongoose.Schema({
         type : String ,
         requried : true ,
         trim : true
-    } , role : {
+    } ,
+    role : {
         type : String ,
         requried : true ,
         trim : true
@@ -20,16 +21,21 @@ const adminSchema = new mongoose.Schema({
         required : true , 
         trim : true ,
         unique : true , 
-        minlength : 10 
+        minlength : 10 ,
+        validate(value) {
+            if(!validator.isMobilePhone(value , ['ar-EG'])){
+                throw new Error ("Please Enter a Correct Phone Number")
+            }
+        }
     } ,
-     password : {
+    password : {
         type : String ,
         requried : true , 
         minlength : 7 , 
         trim : true , 
         validate(value) {
-            if(!value && value.includes('password')){
-                throw Error("password can not be like that")
+            if(validator.equals(value , 'password')){
+                throw Error("Password Can't Be Like That")
             }
         }
     } ,
@@ -41,25 +47,28 @@ const adminSchema = new mongoose.Schema({
         lowercase : true ,
         validate(value){
             if(!validator.isEmail(value)){
-                throw new Error ("it is not an email, please enter a correct email ")
+                throw new Error ("It'S not an Email, Please Enter a Correct One")
             }
         }
-    } , tokens : [{
+    } , 
+    tokens : [{
         token : {
             type : String , 
             requried : true
-        }
-    }] , role_token : {
-            type : String , 
-            requried : true
-        } , profile_picture : {
+    }
+    }] , 
+    role_token : {
+        type : String , 
+        requried : true
+    } , 
+    profile_picture : {
         type : Buffer
     }
 } , {
     timestamps : true
 })
 
-adminSchema.methods.autnToken = async function () {
+adminSchema.methods.authToken = async function () {
 
     const token = jwt.sign({ _id:this._id.toString() } , process.env.ADMIN_JWT)
     this.tokens = this.tokens.concat({token})
@@ -67,7 +76,7 @@ adminSchema.methods.autnToken = async function () {
     return token
 }
 
-adminSchema.methods.autnToken2 = async function () {
+adminSchema.methods.authToken2 = async function () {
 
     const roletoken = jwt.sign({ role:this.role } , process.env.ADMIN_JWT)
     this.role_token = roletoken
@@ -76,32 +85,32 @@ adminSchema.methods.autnToken2 = async function () {
 }
 
 
-// adminSchema.methods.toJSON =  function () {
+adminSchema.methods.toJSON =  function () {
 
-//     const  admin = this
-//     const  adminObject = admin.toObject()
-//     delete adminObject.password
-//     delete adminObject.tokens
+    const  data = this.toObject()
+    delete data.password
+    delete data.tokens
+    delete data.role
+    delete data.profile_picture
+    delete data.role_token
+    delete data.__v
 
-//     return adminObject
+    return data
 
-// }
+}
 
 
-// adminSchema.statics.findByAlternatives = async (email , password) => {
-//     const admin = await Users.findOne( {email : email} )
-
-//     if(!admin){
-//         throw new Error('can not login')
-//     }
-
-//     const isMatch = await bcrypt.compare(password , admin.password)
-
-//     if(!isMatch){
-//         throw new Error('can  not login')
-//     }
-//     return admin
-// }
+adminSchema.statics.findByAlternatives = async (email , password) => {
+    const admin = await Users.findOne( {email} )
+    if(!admin){
+        throw new Error("Admin Doesn't Exist!")
+    }
+    const isMatch = await bcrypt.compare(password , admin.password)
+    if(!isMatch){
+        throw new Error("Wrong Password!. Please Confirm Password")
+    }
+    return admin
+}
 
 
 // function for hashing passwords before saving them

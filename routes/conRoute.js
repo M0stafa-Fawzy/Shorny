@@ -1,7 +1,4 @@
-const clients = require('../models/client')
 const userAuth = require('../src/middleware/clientAuth')
-const lawyers = require('../models/lawyer')
-const lawAuth = require('../src/middleware/lawyerAuth')
 const consultations = require('../models/consultation')
 const express = require('express')
 const conRouter = new express.Router()
