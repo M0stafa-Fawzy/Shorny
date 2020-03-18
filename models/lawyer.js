@@ -51,10 +51,7 @@ const lawyerSchema = new mongoose.Schema({
         type : String , 
         required : true , 
         trim : true 
-    }, 
-    ratting : {
-        type : Number ,
-    } , 
+    },
     lawyer_type : {
         type : String , 
         required : true , 
@@ -65,6 +62,9 @@ const lawyerSchema = new mongoose.Schema({
         required : true ,
         trim : true , 
     } , 
+    rate : {
+        type : Number
+    } ,
     tokens : [{
         token : {
             type : String , 

@@ -1,5 +1,6 @@
 const clients = require('../models/client')
 const consultations = require('../models/consultation')
+const feedback = require('../models/user_feedback')
 const lawyers = require('../models/lawyer')
 const auth = require('../src/middleware/clientAuth')
 const {registerMail , deleteMail} = require('../src/emails/email')
@@ -162,6 +163,7 @@ function updateProfile() {
         }
     })
 }
+
 updateProfile()
 
 
@@ -181,53 +183,90 @@ function deleteAccount(){
 deleteAccount() 
 
 
-function getClientProfile(){
-    clientRouter.get('/users/search/:id' , auth , async (req , res) => {
+
+function getClientProfileByName(){
+    clientRouter.get('/users/userSearch/:name' , auth , async (req , res) => {
         try{
-            const client = await clients.findById(req.params.id)
+            const client = await clients.find({ name : req.params.name })
             if(!client){
-                res.status(404).send()
+                return res.status(404).send()
             }
             res.status(200).send(client)
         }catch(err){
-            res.status(400).send(err)
+            res.status(404).send(err)
         }
     })
 }
 
-getClientProfile()
-
-//it does not work on postman but 
-
-// function getClientProfileByName(){
-//     clientRouter.get('/users/search/:name' , async (req , res) => {
-//         try{
-//             const client = await clients.find({ name : req.params.name })
-//             res.status(200).send(client)
-//         }catch(err){
-//             res.status(404).send(err)
-//         }
-//     })
-// }
-
-// getClientProfileByName()
+getClientProfileByName()
 
 
-function getLawyerProfile(){
-    clientRouter.get('/users/search/:id' , auth , async (req , res) => {
+
+function getLawyerProfileByName(){
+    clientRouter.get('/users/lawyerSearch/:name' , auth , async (req , res) => {
         try{
-            const lawyer = await lawyers.findById(req.params.id)
+            const lawyer = await lawyers.find({ name : req.params.name })
             if(!lawyer){
-                res.status(404).send()
+                return res.status(404).send()
             }
             res.status(200).send(lawyer)
         }catch(err){
-            res.status(400).send(err)
+            res.status(404).send(err)
         }
     })
 }
 
-getLawyerProfile()
+getLawyerProfileByName()
+
+
+
+function sarchByRate(){
+    clientRouter.get('/users/rateSearch/:rate' , auth , async (req , res) => {
+        try{
+            const lawys = await lawyers.find({rate : req.params.rate})
+            res.send(lawys)
+        }catch(err){
+            res.status(400).send()
+        }
+    })
+}
+
+sarchByRate()
+
+
+function sarchByLawyerType(){
+    clientRouter.get('/users/Typesearch/:type' , auth , async (req , res) => {
+        try{
+            const lawys = await lawyers.find({lawyer_type : req.params.type})
+            if(!lawys){
+                return res.status(404).send()
+            }
+            res.status(200).send(lawys)
+        }catch(err){
+            res.status(400).send()
+        }
+    })
+}
+
+sarchByLawyerType()
+
+
+function sarchByLawyerAddress(){
+    clientRouter.get('/users/addressSearch/:address' , auth , async (req , res) => {
+        try{
+            const lawys = await lawyers.find({address : req.params.address})
+            if(!lawys){
+                return res.status(404).send()
+            }
+            res.status(200).send(lawys)
+        }catch(err){
+            res.status(400).send()
+        }
+    })
+}
+
+sarchByLawyerAddress()
+
 
 
 function assignLawyerToCon(){
@@ -274,15 +313,18 @@ showAssinedLawyer()
 
 
 function rateLawyer(){
-    clientRouter.post('/users/lawyer/:id' , auth , async (req , res) => {
+    clientRouter.post('/users/rate/:id' , auth , async (req , res) => {
         try{
+            const feedBack = new feedback({
+                ...req.body ,
+                lawyer : req.params.id , 
+                user : req.client._id
+            })
             const lawyer = await lawyers.findById(req.params.id)
-            if(!lawyer){
-                return res.status(404).send()
-            }
-            lawyer.ratting = req.body.ratting
+            lawyer.rate = req.body.rate
             await lawyer.save()
-            res.status(200).send(lawyer)
+            await feedBack.save()
+            res.status(201).send(feedBack)
         }catch(err){
             res.status(400).send(err)
         }
@@ -291,23 +333,7 @@ function rateLawyer(){
 
 rateLawyer()
 
-function sarchByRate(){
-    clientRouter.get('/users/search/:rate' , auth , async (req , res) => {
-        try{
-            const lawys = await lawyers.find({ratting : req.params.rate})
-            if(!lawys){
-                return res.status(404).send()
-            }
-            res.status(200).send(lawys)
-        }catch(err){
-            res.status(400).send()
-        }
 
-    })
-
-}
-
-sarchByRate()
 
 
 module.exports = clientRouter 
