@@ -24,7 +24,7 @@ app.listen( port, () => {
     console.log("running on port " + port )
 })
 
-const clients = require('../models/client')
+// const clients = require('../models/client')
 // const lawyers = require('../src/db_models/lawyer')
 
 // const cons = require('../src/db_models/concultation')
@@ -47,5 +47,3 @@ const clients = require('../models/client')
 //     console.log(cli.concultations)
 // }
 // any()
-
-

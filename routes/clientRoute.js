@@ -29,7 +29,6 @@ Signup()
 
 
 
-
 function Login(){
     clientRouter.post('/users/login' , async (req , res) => {
         try{
@@ -266,6 +265,23 @@ function sarchByLawyerAddress(){
 }
 
 sarchByLawyerAddress()
+
+
+function generalSearch(){
+    clientRouter.get('/users/search/:town/:region/:type/:rate' , async (req , res) => {
+        try{
+            const lawys = await lawyers.find({town : req.params.town , region : req.params.region , lawyer_type : req.params.type , rate : req.params.rate})
+            if(!lawys){
+                return res.status(404).send()
+            }
+            res.send(lawys)
+        }catch(err){
+            res.status(400).send()
+        }
+    })
+}
+
+generalSearch()
 
 
 

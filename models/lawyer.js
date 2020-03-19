@@ -47,6 +47,9 @@ const lawyerSchema = new mongoose.Schema({
         required : true , 
         trim : true 
     } , 
+    town : String ,
+    region : String
+    ,
     role : {
         type : String , 
         required : true , 
