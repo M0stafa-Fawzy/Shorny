@@ -16,7 +16,10 @@ const replySchema = new mongoose.Schema({
     } , consultation : {
         type : mongoose.Types.ObjectId ,
         ref : 'consultation'
-    }
+    } , user : {
+        type : mongoose.Types.ObjectId ,
+        ref : 'client'
+    } 
 })
 
 const Replies = mongoose.model('reply' , replySchema)

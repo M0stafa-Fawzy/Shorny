@@ -62,6 +62,7 @@ const lawyerSchema = new mongoose.Schema({
     } , 
     status : {
         type : String , 
+        default : 'Available' ,
         required : true ,
         trim : true , 
     } , 

@@ -26,13 +26,15 @@ const consultatoinSchema = new mongoose.Schema({
         trim : true ,
         required : true
     }  , ready_Lawyers : [{
-        lawyer : {
-            type : mongoose.Schema.Types.ObjectId , 
-            ref : 'lawyer' , 
-            //unique : true
-        }
+            lawyer : {
+                type : mongoose.Schema.Types.ObjectId , 
+                ref : 'lawyer' , 
+            }
     }]
 })
+
+
+
 
 
 // function for delete concultation replies if the concultation is deleted

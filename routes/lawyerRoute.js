@@ -213,93 +213,16 @@ function getLawyerProfile(){
 
 getLawyerProfile()
 
-function likeConsultation(){
-    lawyerRoute.post('/consultations/like' , (req , res) => {
 
-    })
-
-}
-
-likeConsultation()
-
-
-function disLikeConcultation(){
-    lawyerRoute.post('/consultations/dislike' , (req , res) => {
-        
-    })
-}
-
-disLikeConcultation()
-
-
-// function replyConcultation(){ // the id is belong to concultation
-//     lawyerRoute.post('/lawyers/consultations/:id/replies' , auth , async (req , res) => {
-//         try{
-//             const rep = new replies({
-//                 ...req.body , 
-//                 lawyer : req.lawyer._id ,
-//                 concultation : req.params.id
-//             })
-//             await (await rep.save()).populate('concultation lawyer').execPopulate()
-//             res.status(201).send(rep)
-//         }catch(err){
-//             res.status(500).send(err)
-//         }
-//     })
-// }
-
-// replyConcultation()
-
-
-// function deleteReply(){// the id is elong to the reply itself
-//     lawyerRoute.delete('/lawyers/consultations/:id/replies/:replyid' , auth , async (req , res) => {
-//         try{
-//             const rep = await replies.findOne({_id : req.params.id , lawyer : req.lawyer.id})
-//             await rep.remove()
-//             res.status(200).send()
-//         }catch(err){
-//             res.status(404).send(err)
-//         }
-//     })
-// }
-
-// deleteReply()
-
-
-// function updateReply(){
-//     lawyerRoute.patch('/lawyers/consultations/:id/replies/:replyid' , auth , async (req , res) => {
-//         const updates = Object.keys(req.body)
-//         const allowUpdates = ['body']
-//         const isValidOperation = updates.every((update) => allowUpdates.includes(update))
-    
-//         if(!isValidOperation){
-//             return res.status(400).send({error : 'invalid updates '})
-//         }
-
-//         try {   
-//             const rep = await replies.findOne({_id : req.params.id , lawyer : req.lawyer.id}) 
-//             if(!rep){
-//                 return res.status(404).send()
-//             }
-//             updates.forEach((update) => rep[update] = req.body[update] )
-//             await rep.save()
-    
-//             res.send(rep) 
-//             }catch (err) {   
-//             res.status(400).send(err) 
-//         }
-//     })
-// }
-
-// updateReply()
-
-
-// this function is for showing the ability to take the case
+// //this function is for showing the ability to take the case
 function showAbility(){ // id = the id of concultation
     lawyerRoute.post('/lawyers/showAbility/:id' , auth , async (req , res ) => {
         try{
             const con = await consultations.findById(req.params.id)
-            con.ready_Lawyers = con.ready_Lawyers.concat({_id : req.lawyer.id})
+            if(!con){
+                return res.status(404).send
+            }
+            con.ready_Lawyers = con.ready_Lawyers.concat({_id : req.lawyer._id})
             await con.save()
             res.status(200).send(con)
         }catch(err){
@@ -309,6 +232,7 @@ function showAbility(){ // id = the id of concultation
 }
 
 showAbility()
+
 
 
 function showAssinedCons(){
@@ -342,6 +266,21 @@ function showAssingerClients(){
 
 showAssingerClients()
 
+
+function changeStatus(){
+    lawyerRoute.post('/lawyers/status' , auth , async (req , res) => {
+        try{
+            req.lawyer.status = req.body.status
+            await req.lawyer.save()
+            res.status(200).send(req.lawyer)
+        }catch(err){
+            res.status(400).send(err)
+        }
+    })
+
+}
+
+changeStatus()
 
 
 

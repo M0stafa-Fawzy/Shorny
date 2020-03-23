@@ -1,8 +1,7 @@
 const express = require('express')
 const replyRouter = new express.Router()
-const lawyers = require('../models/lawyer')
 const lawyerAuth = require('../src/middleware/lawyerAuth')
-const consultations = require('../models/consultation')
+const userAuth = require('../src/middleware/clientAuth')
 const replies = require('../models/replies')
 
 function replayConsultation(){
@@ -68,6 +67,101 @@ function deleteReply(){// id belongs to the reply itself
 }
 
 deleteReply()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+function userReplay(){
+    replyRouter.post('/consultations/:id/userReplies', userAuth , async (req , res) => {
+        const rep = new replies({
+            ...req.body , 
+            consultation : req.params.id , 
+            user : req.client._id
+        })
+        try{
+            await (await rep.save()).populate('consultation client').execPopulate()
+            res.status(201).send(rep)
+        }catch(err){
+            res.status(400).send(err)
+        }
+    }) 
+}
+
+userReplay()
+
+
+function updateReply(){
+    replyRouter.patch('/userReplies/:id' , userAuth , async (req , res) => {
+        const updates = Object.keys(req.body)
+        const allowUpdates = ['body']
+        const isValidOperation = updates.every((update) => allowUpdates.includes(update))
+    
+        if(!isValidOperation){
+            return res.status(400).send({error : 'invalid updates '})
+        }
+
+        try {   
+            const rep = await replies.findOne({_id : req.params.id , user : req.client._id}) 
+            if(!rep){
+                return res.status(404).send()
+            }
+            updates.forEach((update) => rep[update] = req.body[update] )
+            await rep.save()
+    
+            res.send(rep) 
+            }catch (err) {   
+            res.status(400).send(err) 
+        }
+    })
+}
+
+updateReply()
+
+
+function deleteReply(){// id belongs to the reply itself
+    replyRouter.delete('/userReplies/:id' , userAuth , async (req , res) => {
+        try{
+            const rep = await replies.findOne({_id : req.params.id , user : req.client.id})
+            if(!rep){
+                return res.status(404).send()
+            }
+            await rep.remove()
+            res.status(200).send(rep)
+        }catch(err){
+            res.status(404).send(err)
+        }
+    })
+}
+
+deleteReply()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 function repliesCount(){ // every actor can do it so it does not need to sit under auth

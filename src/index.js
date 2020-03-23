@@ -47,3 +47,59 @@ app.listen( port, () => {
 //     console.log(cli.concultations)
 // }
 // any()
+// const arr = [{ name : "mo" , age : 25 } , 
+// { name : "mo" , age : 25 } ,
+// { name : "momo" , age : 25 } 
+// , 5555]
+
+// for(i = 0 ; i<arr.length ; i++){
+//     if(arr)
+// }
+//arr.concat(55)
+// if( arr.some( (value) => { 
+//         if(value.name === "mo"){
+//             console.log('fon')
+//         }else{
+//             console.log('not')
+//         }
+//     })){
+//         console.log('foun')
+        
+//     }else{('not fiund')}
+
+
+// const arr = [{"_id" : "545484f5rgf4v65e4g84"} , {"_id" : "545484f54v65e4g84"} , {"_id" : "545484f5hgfd4v65e4g84"} , {"_id" : "545484f54v6jhgdfdf5e4g84"} ,]
+
+
+// arr.some( (value) => {
+//     if(value._id === "545484f54v65e4g84"){
+//         console.log('existed')
+
+//     }else{
+//         console.log('not existed')
+
+//     }
+// })
+
+
+//const arr = [{"_id" : "545484f5rgf4v65e4g84"} , "545484f5rgf4v65e4g84" ,{"_id" : "545484f54v65e4g84"} , {"_id" : "545484f5hgfd4v65e4g84"} , {"_id" : "545484f54v6jhgdfdf5e4g84"}]
+
+// arr.forEach( (value) => {
+//     if(value._id !== "545484f5rgf4v65e4g84"){
+//         console.log("ther is not value")
+//     }else{
+//         console.log(value)
+//     }
+// })
+
+
+
+
+
+
+
+
+
+
+
+

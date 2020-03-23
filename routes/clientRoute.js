@@ -284,6 +284,27 @@ function generalSearch(){
 generalSearch()
 
 
+function showReadyLawyer(){
+    clientRouter.get('/users/ready/:id' , auth , async (req , res) => {
+        try{
+            const con = await consultations.findOne({ _id : req.params.id , client : req.client._id})
+            if(!con){
+                return res.status(404).send()
+            }
+            const readr_Lawyers = await lawyers.find({_id : con.ready_Lawyers})
+            if(!readr_Lawyers){
+                return res.status(404).send()
+            }
+            res.status(200).send(readr_Lawyers)
+        }catch(err){
+            res.status(400).send(err)
+        }
+    })
+}
+
+showReadyLawyer()
+
+
 
 function assignLawyerToCon(){
     clientRouter.post('/users/:conID/lawyer/:id' , auth , async (req , res) => {
