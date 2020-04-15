@@ -82,7 +82,7 @@ deleteProfilePic()
 
 
 function getProfilePic(){
-    clientRouter.get('/users/:id/profilePic' , async (req , res) => {
+    clientRouter.get('/users/:id/profilepicture' , async (req , res) => {
         try{
             const user = await clients.findById(req.params.id)
             if(!user || !user.profile_picture){
@@ -283,28 +283,6 @@ function generalSearch(){
 generalSearch()
 
 
-function showReadyLawyer(){
-    clientRouter.get('/users/ready/:id' , auth , async (req , res) => {
-        try{
-            const con = await consultations.findOne({ _id : req.params.id , client : req.client._id})
-            if(!con){
-                return res.status(404).send()
-            }
-            const readr_Lawyers = await lawyers.find({_id : con.ready_Lawyers})
-            if(!readr_Lawyers){
-                return res.status(404).send()
-            }
-            res.status(200).send(readr_Lawyers)
-        }catch(err){
-            res.status(400).send(err)
-        }
-    })
-}
-
-showReadyLawyer()
-
-
-
 function assignLawyerToCon(){
     clientRouter.post('/users/:conID/lawyer/:id' , auth , async (req , res) => {
         try{
@@ -347,24 +325,6 @@ function showAssinedLawyer(){
 
 showAssinedLawyer()
 
-
-
-
-
-//  clientRouter.get('/rate/:id' , async (req,res) => {
-//     const t = await lawyers.findById(req.params.id)
-//     await t.rateRatio()
-//     res.json('tt')
-//  })
-
-//  clientRouter.get('/rate' , async (req,res) => {
-//     const typesss = await lawyers.find()
-//     var x = []
-//     for(var i=0 ; i<typesss.length ; i++){
-//         x[i] = typesss[i].lawyer_type
-//     }
-//     res.send(x)
-//  })
 
 // clientRouter.get('/test' , async function (req , mo) {
 //     const cli = await clients.findOne({name : "Virgil"}).select('email name')

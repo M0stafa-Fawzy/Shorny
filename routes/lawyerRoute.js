@@ -81,7 +81,7 @@ deleteProfilePic()
 
 
 function getProfilePic(){
-    lawyerRoute.get('/lawyers/:id/profilePic' , async (req , res) => {
+    lawyerRoute.get('/lawyers/:id/profilepicture' , async (req , res) => {
         try{
             const lawyer = await lawyers.findById(req.params.id)
             if(!lawyer || !lawyer.profile_picture){

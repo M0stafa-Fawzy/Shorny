@@ -1,5 +1,6 @@
 const userAuth = require('../src/middleware/clientAuth')
 const consultations = require('../models/consultation')
+const lawyers = require('../models/lawyer')
 const express = require('express')
 const conRouter = new express.Router()
 
@@ -164,21 +165,25 @@ function dislikeCon() {
 
 dislikeCon()
 
-function getAvailableLawyers(){
-    conRouter.get('/consultations/:id/AvailableLawyers' , userAuth , async (req , res) => {
+
+function showReadyLawyer(){
+    conRouter.get('/consultations/:id/readyLawyers' , userAuth , async (req , res) => {
         try{
             const con = await consultations.findById(req.params.id)
             if(!con || con.client != req.client.id ){
                 return res.status(404).send()
             }
-            res.status(200).send(con.ready_Lawyers)
+            const readyLawyers = await lawyers.find({_id : con.ready_Lawyers})
+            res.status(200).send(readyLawyers)
         }catch(err){
             res.status(400).send()
         }
     })
 }
 
-getAvailableLawyers()
+showReadyLawyer()
+
+
 
 
 module.exports = conRouter
