@@ -1,28 +1,23 @@
-const express = require('express')
-const app = express() 
-app.use(express.json())
-
-const adm = require('../routes/adminRoute')
-app.use(adm)
-
-const cli = require('../routes/clientRoute')
-app.use(cli)
-
-const law = require('../routes/lawyerRoute')
-app.use(law)
-
-const con = require('../routes/conRoute')
-app.use(con)
-
-const rep = require('../routes/replyRoute')
-app.use(rep)
+const app = require('./app')
 
 port = process.env.PORT
-
 
 app.listen( port, () => {
     console.log("running on port " + port )
 })
+
+//const express = require('express')
+// const path = require('path')
+// //const hbs = require('hbs')
+// const app = express() 
+// const htmlPath = path.join(__dirname , '../views')
+// app.use(express.static(htmlPath))
+// app.set('view engine','hbs')
+// app.set('views' , htmlPath)
+
+// app.get('' , (req , res) => {
+//     res.render('tea')    
+// })
 
 // const clients = require('../models/client')
 // const lawyers = require('../src/db_models/lawyer')
@@ -47,59 +42,10 @@ app.listen( port, () => {
 //     console.log(cli.concultations)
 // }
 // any()
-// const arr = [{ name : "mo" , age : 25 } , 
-// { name : "mo" , age : 25 } ,
-// { name : "momo" , age : 25 } 
-// , 5555]
 
-// for(i = 0 ; i<arr.length ; i++){
-//     if(arr)
-// }
-//arr.concat(55)
-// if( arr.some( (value) => { 
-//         if(value.name === "mo"){
-//             console.log('fon')
-//         }else{
-//             console.log('not')
-//         }
-//     })){
-//         console.log('foun')
-        
-//     }else{('not fiund')}
-
-
-// const arr = [{"_id" : "545484f5rgf4v65e4g84"} , {"_id" : "545484f54v65e4g84"} , {"_id" : "545484f5hgfd4v65e4g84"} , {"_id" : "545484f54v6jhgdfdf5e4g84"} ,]
-
-
-// arr.some( (value) => {
-//     if(value._id === "545484f54v65e4g84"){
-//         console.log('existed')
-
-//     }else{
-//         console.log('not existed')
-
-//     }
-// })
-
-
-//const arr = [{"_id" : "545484f5rgf4v65e4g84"} , "545484f5rgf4v65e4g84" ,{"_id" : "545484f54v65e4g84"} , {"_id" : "545484f5hgfd4v65e4g84"} , {"_id" : "545484f54v6jhgdfdf5e4g84"}]
-
-// arr.forEach( (value) => {
-//     if(value._id !== "545484f5rgf4v65e4g84"){
-//         console.log("ther is not value")
-//     }else{
-//         console.log(value)
-//     }
-// })
-
-
-
-
-
-
-
-
-
-
-
-
+const tt = {
+    name : "mmo" , 
+    age : 23 , 
+    specialized : "is" , 
+    yog : 2016
+}

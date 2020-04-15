@@ -10,6 +10,9 @@ const sharp = require('sharp')
 const clientRouter = new express.Router()
 
 
+
+
+
 function Signup(){
     clientRouter.post('/users' , async (req , res)=> {
         try{
@@ -350,7 +353,7 @@ showAssinedLawyer()
 
 
 function rateLawyer(){
-    clientRouter.post('/users/rate/:id' , auth , async (req , res) => {
+    clientRouter.post('/users/lawyer/:id/rate' , auth , async (req , res) => {
         try{
             const feedBack = new feedback({
                 ...req.body ,
@@ -358,9 +361,8 @@ function rateLawyer(){
                 user : req.client._id
             })
             const lawyer = await lawyers.findById(req.params.id)
-            lawyer.rate = req.body.rate
-            await lawyer.save()
             await feedBack.save()
+            await lawyer.rateRatio()
             res.status(201).send(feedBack)
         }catch(err){
             res.status(400).send(err)
@@ -371,6 +373,41 @@ function rateLawyer(){
 rateLawyer()
 
 
+function showfeedbacks(){
+    clientRouter.get('/users/lawyer/:id/feedbacks', async (req , res) => {
+        try{
+            const feedBacks = await feedback.find({lawyer:req.params.id})
+            if(!feedBacks){
+                return res.status(404).send()
+            }
+            res.status(200).send(feedBacks)
+        }catch(err){
+            res.status(400).send(err)
+        }
+    })
+}
 
+showfeedbacks()
+
+
+//  clientRouter.get('/rate/:id' , async (req,res) => {
+//     const t = await lawyers.findById(req.params.id)
+//     await t.rateRatio()
+//     res.json('tt')
+//  })
+
+//  clientRouter.get('/rate' , async (req,res) => {
+//     const typesss = await lawyers.find()
+//     var x = []
+//     for(var i=0 ; i<typesss.length ; i++){
+//         x[i] = typesss[i].lawyer_type
+//     }
+//     res.send(x)
+//  })
+
+// clientRouter.get('/test' , async function (req , mo) {
+//     const cli = await clients.findOne({name : "Virgil"}).select('email name')
+//     mo.json(cli)
+// })
 
 module.exports = clientRouter 

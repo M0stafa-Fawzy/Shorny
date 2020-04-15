@@ -1,4 +1,5 @@
 //require('../src/db/mongoose')
+const feedback = require('./user_feedback')
 const mongoose = require ('mongoose') 
 const validator = require('validator')
 const bcrypt = require('bcryptjs')
@@ -45,7 +46,6 @@ const lawyerSchema = new mongoose.Schema({
     address : {
         type : String , 
         required : true , 
-        trim : true 
     } , 
     town : String ,
     region : String
@@ -67,7 +67,8 @@ const lawyerSchema = new mongoose.Schema({
         trim : true , 
     } , 
     rate : {
-        type : Number
+        type : Number , 
+        defauth : 0
     } ,
     tokens : [{
         token : {
@@ -143,6 +144,16 @@ lawyerSchema.methods.authToken2 = async function () {
     return  roletoken 
 }
 
+lawyerSchema.methods.rateRatio = async function () {
+    const rates = await feedback.find({lawyer : this._id})
+    const count = await feedback.countDocuments({lawyer : this._id})
+    let avrRate = 0
+    for(var i = 0 ; i<count ; i++ ){
+        avrRate += (rates[i].rate)/count
+    }
+    this.rate = avrRate
+    await this.save()
+}
 
 
 lawyerSchema.statics.findByAlternatives = async (email , password) => {
@@ -163,8 +174,9 @@ lawyerSchema.pre('save' , async function(next){
 
     this.password = await bcrypt.hash(this.password, 8)
     next() ; 
-
 })
+
+
 
 const Lawyers = mongoose.model('lawyer' , lawyerSchema) 
 
