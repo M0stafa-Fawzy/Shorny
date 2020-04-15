@@ -17,4 +17,7 @@ app.use(con)
 const rep = require('../routes/replyRoute')
 app.use(rep)
 
+const rate = require('../routes/rateRoute')
+app.use(rate)
+
 module.exports = app
