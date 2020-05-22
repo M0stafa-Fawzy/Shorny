@@ -14,6 +14,7 @@ function replayConsultation(){
         try{
             await (await rep.save()).populate('consultation lawyer').execPopulate()
             res.status(201).send(rep)
+            req.app.io.emit('lawyerReply' , rep)
         }catch(err){
             res.status(400).send(err)
         }
@@ -40,8 +41,8 @@ function updateReply(){
             }
             updates.forEach((update) => rep[update] = req.body[update] )
             await rep.save()
-    
             res.send(rep) 
+          //  req.app.io.emit('updateLawyerReply' , rep)
             }catch (err) {   
             res.status(400).send(err) 
         }
@@ -60,6 +61,7 @@ function deleteReply(){// id belongs to the reply itself
             }
             await rep.remove()
             res.status(200).send(rep)
+          //  req.app.io.emit('deleteLawyerReply' , rep)
         }catch(err){
             res.status(404).send(err)
         }
@@ -67,21 +69,6 @@ function deleteReply(){// id belongs to the reply itself
 }
 
 deleteReply()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 function userReplay(){
@@ -94,6 +81,7 @@ function userReplay(){
         try{
             await (await rep.save()).populate('consultation client').execPopulate()
             res.status(201).send(rep)
+            req.app.io.emit('userReply' , rep)
         }catch(err){
             res.status(400).send(err)
         }
@@ -120,8 +108,8 @@ function updateReply(){
             }
             updates.forEach((update) => rep[update] = req.body[update] )
             await rep.save()
-    
             res.send(rep) 
+           // req.app.io.emit('updateUserReply' , rep)
             }catch (err) {   
             res.status(400).send(err) 
         }
@@ -140,6 +128,7 @@ function deleteReply(){// id belongs to the reply itself
             }
             await rep.remove()
             res.status(200).send(rep)
+           // req.app.io.emit('deleteUserReply' , rep)
         }catch(err){
             res.status(404).send(err)
         }
@@ -147,21 +136,6 @@ function deleteReply(){// id belongs to the reply itself
 }
 
 deleteReply()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 function repliesCount(){ // every actor can do it so it does not need to sit under auth
@@ -191,6 +165,7 @@ function getAllReplies(){ // every actor can do it so it does not need to sit un
                 res.status(404).send()
             }
             res.status(200).send(reps)
+            //req.app.io.emit('allReplies' , reps)
         }catch(err){
             res.status(400).send(err)
         }
@@ -207,6 +182,7 @@ function likeReply() {
             reply.likes ++
             await reply.save()
             res.status(200).send(reply)
+            req.app.io.emit('likeReply' , reply)
         }catch(err){
             res.status(400).send()
         }
@@ -223,6 +199,7 @@ function dislikeReply() {
             reply.dislikes ++
             await reply.save()
             res.status(200).send(reply)
+            req.app.io.emit('disLikeReply' , reply)
         }catch(err){
             res.status(400).send()
         }

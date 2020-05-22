@@ -88,6 +88,7 @@ function updateConsultation() {
             updates.forEach((update) => con[update] = req.body[update])
             await con.save()
             res.send(con) 
+           // req.app.io.emit('updateCon' , con)
             }catch (err) {   
             res.status(400).send(err) 
         }
@@ -107,6 +108,7 @@ function deleteConsultation() {
             }
             await con.remove()
             res.status(200).send(con)
+           // req.app.io.emit('deleteCon' , con)
         }catch(err){
             res.status(500).send()
         }
@@ -125,6 +127,7 @@ function deleteAllConsultations() {
                return res.status(404).send()
             }
             res.status(200).send(cons)
+           // req.app.io.emit('deleteAllCons' , cons)
         }catch(err){
             res.status(500).send(err)
         }
@@ -141,6 +144,7 @@ function likeCon() {
             con.likes ++
             await con.save()
             res.status(200).send(con)
+            req.app.io.emit('likeCon' , con)
         }catch(err){
             res.status(400).send()
         }
@@ -157,6 +161,7 @@ function dislikeCon() {
             con.dislikes ++
             await con.save()
             res.status(200).send(con)
+            req.app.io.emit('dislikeCon' , con)
         }catch(err){
             res.status(400).send()
         }
@@ -165,25 +170,22 @@ function dislikeCon() {
 
 dislikeCon()
 
-
-function showReadyLawyer(){
-    conRouter.get('/consultations/:id/readyLawyers' , userAuth , async (req , res) => {
+function getAvailableLawyers(){
+    conRouter.get('/consultations/:id/AvailableLawyers' , userAuth , async (req , res) => {
         try{
             const con = await consultations.findById(req.params.id)
             if(!con || con.client != req.client.id ){
                 return res.status(404).send()
             }
-            const readyLawyers = await lawyers.find({_id : con.ready_Lawyers})
-            res.status(200).send(readyLawyers)
+            const avaiLawyers = await lawyers.find({_id : con.ready_Lawyers})
+            res.status(200).send(avaiLawyers)
         }catch(err){
             res.status(400).send()
         }
     })
 }
 
-showReadyLawyer()
-
-
+getAvailableLawyers()
 
 
 module.exports = conRouter

@@ -12,7 +12,7 @@ function signup() {
     lawyerRoute.post('/lawyers' , async (req ,res) => {
         try{
             const lawyer = new lawyers(req.body)
-            await registerMail(lawyer.email , lawyer.name)
+           // await registerMail(lawyer.email , lawyer.name)
             const token = await lawyer.authToken()
             const roleToken = await lawyer.authToken2()
             await lawyer.save()
@@ -81,7 +81,7 @@ deleteProfilePic()
 
 
 function getProfilePic(){
-    lawyerRoute.get('/lawyers/:id/profilepicture' , async (req , res) => {
+    lawyerRoute.get('/lawyers/:id/profilePic' , async (req , res) => {
         try{
             const lawyer = await lawyers.findById(req.params.id)
             if(!lawyer || !lawyer.profile_picture){
@@ -170,7 +170,7 @@ function deleteAccount(){
     lawyerRoute.delete('/lawyers/me' , auth , async (req , res) => {
         try{
             await req.lawyer.remove()
-            await deleteMail(req.lawyer.email , req.lawyer.name)
+            //await deleteMail(req.lawyer.email , req.lawyer.name)
             res.send(req.lawyer)
         } catch (err) {
             res.status(500).send()

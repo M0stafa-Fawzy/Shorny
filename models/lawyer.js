@@ -147,10 +147,8 @@ lawyerSchema.methods.authToken2 = async function () {
 lawyerSchema.methods.rateRatio = async function () {
     const rates = await feedback.find({lawyer : this._id})
     const count = await feedback.countDocuments({lawyer : this._id})
-    let avrRate = 0
-    for(var i = 0 ; i<count ; i++ ){
-        avrRate += (rates[i].rate)/count
-    }
+    let avrRate = 0 
+    rates.forEach(value => avrRate += (value.rate) / count)
     this.rate = avrRate
     await this.save()
 }

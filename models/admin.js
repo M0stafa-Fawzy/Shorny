@@ -9,7 +9,6 @@ const adminSchema = new mongoose.Schema({
     name : {
         type : String ,
         requried : true ,
-        trim : true
     } ,
     role : {
         type : String ,
@@ -21,7 +20,6 @@ const adminSchema = new mongoose.Schema({
         required : true , 
         trim : true ,
         unique : true , 
-        minlength : 10 ,
         validate(value) {
             if(!validator.isMobilePhone(value , ['ar-EG'])){
                 throw new Error ("Please Enter a Correct Phone Number")
@@ -32,7 +30,6 @@ const adminSchema = new mongoose.Schema({
         type : String ,
         requried : true , 
         minlength : 7 , 
-        trim : true , 
         validate(value) {
             if(validator.equals(value , 'password')){
                 throw Error("Password Can't Be Like That")
@@ -44,7 +41,6 @@ const adminSchema = new mongoose.Schema({
         unique : true , 
         requried : true ,
         trim : true , 
-        lowercase : true ,
         validate(value){
             if(!validator.isEmail(value)){
                 throw new Error ("It'S not an Email, Please Enter a Correct One")

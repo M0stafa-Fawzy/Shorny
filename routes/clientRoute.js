@@ -13,7 +13,7 @@ function Signup(){
     clientRouter.post('/users' , async (req , res)=> {
         try{
             const client = new clients(req.body)
-            await registerMail(client.email , client.name)
+           // await registerMail(client.email , client.name)
             const token = await client.authToken()
             const role = await client.authToken2()
             await client.save() ; 
@@ -82,7 +82,7 @@ deleteProfilePic()
 
 
 function getProfilePic(){
-    clientRouter.get('/users/:id/profilepicture' , async (req , res) => {
+    clientRouter.get('/users/:id/profilePic' , async (req , res) => {
         try{
             const user = await clients.findById(req.params.id)
             if(!user || !user.profile_picture){
@@ -154,7 +154,6 @@ function updateProfile() {
         try {    
             updates.forEach((update) => req.client[update] = req.body[update] )
             await req.client.save()
-    
             res.send(req.client) 
             }catch (err) {   
             res.status(400).send(err) 
@@ -170,7 +169,7 @@ function deleteAccount(){
 
         try{
             await req.client.remove()
-            await deleteMail(req.client.email , req.client.name)
+           // await deleteMail(req.client.email , req.client.name)
             res.send(req.client)
         } catch (err) {
             res.status(400).send()
@@ -183,7 +182,7 @@ deleteAccount()
 
 
 function getClientProfileByName(){
-    clientRouter.get('/users/userSearch/:name' , auth , async (req , res) => {
+    clientRouter.get('/users/userSearch/:name' , async (req , res) => {
         try{
             const client = await clients.find({ name : req.params.name })
             if(!client){
@@ -201,7 +200,7 @@ getClientProfileByName()
 
 
 function getLawyerProfileByName(){
-    clientRouter.get('/users/lawyerSearch/:name' , auth , async (req , res) => {
+    clientRouter.get('/users/lawyerSearch/:name' , async (req , res) => {
         try{
             const lawyer = await lawyers.find({ name : req.params.name })
             if(!lawyer){
@@ -219,7 +218,7 @@ getLawyerProfileByName()
 
 
 function sarchByRate(){
-    clientRouter.get('/users/rateSearch/:rate' , auth , async (req , res) => {
+    clientRouter.get('/users/rateSearch/:rate' , async (req , res) => {
         try{
             const lawys = await lawyers.find({rate : req.params.rate})
             res.send(lawys)
@@ -233,7 +232,7 @@ sarchByRate()
 
 
 function sarchByLawyerType(){
-    clientRouter.get('/users/Typesearch/:type' , auth , async (req , res) => {
+    clientRouter.get('/users/Typesearch/:type' , async (req , res) => {
         try{
             const lawys = await lawyers.find({lawyer_type : req.params.type})
             if(!lawys){
@@ -250,7 +249,7 @@ sarchByLawyerType()
 
 
 function sarchByLawyerAddress(){
-    clientRouter.get('/users/addressSearch/:address' , auth , async (req , res) => {
+    clientRouter.get('/users/addressSearch/:address' , async (req , res) => {
         try{
             const lawys = await lawyers.find({address : req.params.address})
             if(!lawys){
@@ -281,6 +280,28 @@ function generalSearch(){
 }
 
 generalSearch()
+
+
+function showReadyLawyer(){
+    clientRouter.get('/users/ready/:id' , auth , async (req , res) => {
+        try{
+            const con = await consultations.findOne({ _id : req.params.id , client : req.client._id})
+            if(!con){
+                return res.status(404).send()
+            }
+            const readr_Lawyers = await lawyers.find({_id : con.ready_Lawyers})
+            if(!readr_Lawyers){
+                return res.status(404).send()
+            }
+            res.status(200).send(readr_Lawyers)
+        }catch(err){
+            res.status(400).send(err)
+        }
+    })
+}
+
+showReadyLawyer()
+
 
 
 function assignLawyerToCon(){
@@ -326,9 +347,29 @@ function showAssinedLawyer(){
 showAssinedLawyer()
 
 
+
+
+
+//  clientRouter.get('/rate/:id' , async (req,res) => {
+//     const t = await lawyers.findById(req.params.id)
+//     await t.rateRatio()
+//     res.json('tt')
+//  })
+
+//  clientRouter.get('/rate' , async (req,res) => {
+//     const typesss = await lawyers.find()
+//     var x = []
+//     for(var i=0 ; i<typesss.length ; i++){
+//         x[i] = typesss[i].lawyer_type
+//     }
+//     res.send(x)
+//  })
+
 // clientRouter.get('/test' , async function (req , mo) {
 //     const cli = await clients.findOne({name : "Virgil"}).select('email name')
 //     mo.json(cli)
+//     req.app.io.emit('users' , cli)
 // })
+
 
 module.exports = clientRouter 

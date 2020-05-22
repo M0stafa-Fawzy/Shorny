@@ -41,7 +41,7 @@ const consultatoinSchema = new mongoose.Schema({
 //hint : it does not work and i do not know why 
 consultatoinSchema.pre('remove' , async function (next) {
 
-    await replies.deleteMany({concultation : this._id})
+    await replies.deleteMany({consultation : this._id})
 
    next()
 })
