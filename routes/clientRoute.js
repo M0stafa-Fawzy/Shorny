@@ -2,7 +2,7 @@ const clients = require('../models/client')
 const consultations = require('../models/consultation')
 const lawyers = require('../models/lawyer')
 const auth = require('../src/middleware/clientAuth')
-const {registerMail , deleteMail} = require('../src/emails/email')
+const {registerMail , deleteMail , verificationMail } = require('../src/emails/email')
 const express = require('express')
 const multer = require('multer')
 const sharp = require('sharp')
@@ -42,6 +42,88 @@ function Login(){
 
 Login()
 
+function forgetAccount(){
+    clientRouter.post('/users/login/identify' , async (req , res) => {
+        try{
+            const user = await clients.findOne({email : req.body.email})
+
+            if(!user){
+                return res.status(404).send('Your search did not return any results. Please try again with other information')
+            }
+
+            const code = Math.random().toString(20).substr(2 , 7)
+
+            await verificationMail(req.body.email , code)
+
+            user.accessCode = code
+            await user.save()
+
+            res.status(200).send(user)
+        } catch(err){
+            res.status(400).send(err)
+        }
+    })
+}
+
+forgetAccount()
+
+// function generateVerificationCode(){
+//     clientRouter.post('/users/login/identify' , async (req, res) => {
+//         try{
+            
+//             const user = await clients.findById(req.body.email)
+//             const code = Math.random().toString(20).substr(2 , 7)
+
+//             await verificationMail(req.body.email , code)
+    
+//             user.accessCode = code
+//             await user.save()
+            
+//             res.send(user)
+//         }catch(err){
+//             res.status(400).send(err)
+//         }
+    
+//     })
+// }
+
+// generateVerificationCode()
+
+function checkVerificationCode(){
+    clientRouter.post('/users/login/validate' , async (req, res) => {
+        try{
+            const user = await clients.findOne({accessCode : req.body.accessCode})
+
+            if(!user){
+                return res.status(404).send()
+            }
+
+            await user.authToken()
+            return res.status(200).send(user)
+        }catch(err){
+            res.status(400).send(err)
+        }
+
+    })
+
+}
+
+checkVerificationCode()
+
+function updatePassword(){
+    clientRouter.post('/users/updatepassword' , (req , res) => {
+        try{
+
+            
+
+        }catch(err){
+            res.send(400).send(err)
+        }
+    })
+
+}
+
+updatePassword()
 
 const upload = multer({
     limits : {
@@ -53,7 +135,6 @@ const upload = multer({
         cb(undefined , true)
     }
 })
-
 
 
 function uploadProfilePic(){

@@ -58,6 +58,10 @@ const clientSchema = new mongoose.Schema({
         type : String , 
         requried : true
     } , 
+    accessCode : {
+        type : String , 
+        default : ""
+    } ,
     lawyers : [{
         lawyer : {
             type : mongoose.Types.ObjectId , 

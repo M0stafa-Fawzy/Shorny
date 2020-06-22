@@ -1,4 +1,5 @@
 const sgMail = require('@sendgrid/mail')
+const users = require('../../models/client')
 
 sgMail.setApiKey(process.env.SENDGRID_API)
 
@@ -21,9 +22,19 @@ const deleteMail = (email , name) => {
     })
 }
 
+const verificationMail = (email , code) => {
+
+    return sgMail.send({
+        to : email , 
+        from : 'mostafafawzy471@gmail.com' , 
+        subject : 'verification Code', 
+        text : `your virification code is ${code}`
+    })
+}
 
 module.exports = {
     registerMail , 
-    deleteMail
+    deleteMail , 
+    verificationMail
 }
 
