@@ -3,7 +3,7 @@ const lawyers = require('../models/lawyer')
 const clients = require('../models/client')
 const consultations = require('../models/consultation')
 const auth = require('../src/middleware/lawyerAuth')
-const {registerMail , deleteMail} = require('../src/emails/email')
+const {registerMail , deleteMail , verificationMail} = require('../src/emails/email')
 const multer = require('multer')
 const sharp = require('sharp')
 const lawyerRoute = new express.Router()
@@ -41,6 +41,93 @@ function login() {
 }
 
 login()
+
+function forgetAccount(){
+    lawyerRoute.post('/lawyers/login/identify' , async (req , res) => {
+        try{
+            const lawyer = await lawyers.findOne({email : req.body.email})
+
+            if(!lawyer){
+                return res.status(404).send('Your search did not return any results. Please try again with other information')
+            }
+
+            const code = Math.random().toString(20).substr(2 , 7)
+
+            await verificationMail(req.body.email , code)
+
+            lawyer.accessCode = code
+            await lawyer.save()
+
+            res.status(200).send(lawyer)
+        } catch(err){
+            res.status(400).send(err)
+        }
+    })
+}
+
+forgetAccount()
+
+// function generateVerificationCode(){
+//     clientRouter.post('/users/login/identify' , async (req, res) => {
+//         try{
+            
+//             const user = await clients.findById(req.body.email)
+//             const code = Math.random().toString(20).substr(2 , 7)
+
+//             await verificationMail(req.body.email , code)
+    
+//             user.accessCode = code
+//             await user.save()
+            
+//             res.send(user)
+//         }catch(err){
+//             res.status(400).send(err)
+//         }
+    
+//     })
+// }
+
+// generateVerificationCode()
+
+function checkVerificationCode(){
+    lawyerRoute.post('/lawyers/login/validate' , async (req, res) => {
+        try{
+            const lawyer = await lawyers.findOne({accessCode : req.body.accessCode})
+
+            if(!lawyer){
+                return res.status(404).send()
+            }
+
+            await lawyer.authToken()
+            return res.status(200).send(lawyer)
+        }catch(err){
+            res.status(400).send(err)
+        }
+
+    })
+
+}
+
+checkVerificationCode()
+
+function updatePassword(){
+    lawyerRoute.post('/lawyers/changepassword' , async (req , res) => {
+        try{
+
+            const lawyer = await lawyers.findOne({email : req.body.email})
+            lawyer.password = req.body.password
+
+            await lawyer.save()
+            res.status(200).send(lawyer)
+
+        }catch(err){
+            res.send(400).send(err)
+        }
+    })
+
+}
+
+updatePassword()
 
 
 const upload = multer({

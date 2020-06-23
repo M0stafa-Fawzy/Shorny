@@ -70,6 +70,10 @@ const lawyerSchema = new mongoose.Schema({
         type : Number , 
         defauth : 0
     } ,
+    accessCode : {
+        type : String , 
+        default : ""
+    } ,
     tokens : [{
         token : {
             type : String , 

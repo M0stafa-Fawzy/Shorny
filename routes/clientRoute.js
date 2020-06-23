@@ -111,10 +111,14 @@ function checkVerificationCode(){
 checkVerificationCode()
 
 function updatePassword(){
-    clientRouter.post('/users/updatepassword' , (req , res) => {
+    clientRouter.post('/users/changepassword' , async (req , res) => {
         try{
 
-            
+            const user = await clients.findOne({email : req.body.email})
+            user.password = req.body.password
+
+            await user.save()
+            res.status(200).send(user)
 
         }catch(err){
             res.send(400).send(err)
