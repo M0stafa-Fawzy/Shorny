@@ -66,7 +66,7 @@ const adminSchema = new mongoose.Schema({
 
 adminSchema.methods.authToken = async function () {
 
-    const token = jwt.sign({ _id:this._id.toString() } , process.env.ADMIN_JWT)
+    const token = jwt.sign({ _id:this._id.toString() } , process.env.SECRET_JWT_KEY)
     this.tokens = this.tokens.concat({token})
     await this.save()
     return token
@@ -74,7 +74,7 @@ adminSchema.methods.authToken = async function () {
 
 adminSchema.methods.authToken2 = async function () {
 
-    const roletoken = jwt.sign({ role:this.role } , process.env.ADMIN_JWT)
+    const roletoken = jwt.sign({ role:this.role } , process.env.SECRET_JWT_KEY)
     this.role_token = roletoken
     await this.save()
     return roletoken

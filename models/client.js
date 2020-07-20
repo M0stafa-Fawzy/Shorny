@@ -87,7 +87,7 @@ clientSchema.virtual('concultations' , { // or any aonther name
 
 clientSchema.methods.authToken = async function () {
     // just return token witch generated from id + key
-    const token = jwt.sign({ _id:this._id.toString() } , process.env.USER_JWT)
+    const token = jwt.sign({ _id:this._id.toString() } , process.env.SECRET_JWT_KEY)
     this.tokens = this.tokens.concat({token})
     await this.save()
     return token
@@ -95,7 +95,7 @@ clientSchema.methods.authToken = async function () {
 
 clientSchema.methods.authToken2 = async function () {
     // just return token witch generated from role + key
-    const roletoken = jwt.sign({ role : this.role} , process.env.USER_JWT)
+    const roletoken = jwt.sign({ role : this.role} , process.env.SECRET_JWT_KEY)
     this.roleToken = roletoken
     await this.save()
     return  roletoken 

@@ -1,22 +1,28 @@
 const express = require('express')
 const replyRouter = new express.Router()
-const lawyerAuth = require('../src/middleware/lawyerAuth')
-const userAuth = require('../src/middleware/clientAuth')
+const generalAuth = require('../src/middleware/generalAuth')
 const replies = require('../models/replies')
 
 function replayConsultation(){
-    replyRouter.post('/consultations/:id/replies', lawyerAuth , async (req , res) => {
-        const rep = new replies({
-            ...req.body , 
-            consultation : req.params.id , 
-            lawyer : req.lawyer._id
-        })
-        try{
-            await (await rep.save()).populate('consultation lawyer').execPopulate()
+    replyRouter.post('/consultations/:id/replies', generalAuth , async (req , res) => {
+        if(req.actor.role === 'lawyer'){
+            const rep = new replies({
+                ...req.body , 
+                consultation : req.params.id , 
+                lawyer : req.actor._id
+            })
+            await rep.save()
             res.status(201).send(rep)
-            req.app.io.emit('lawyerReply' , rep)
-        }catch(err){
-            res.status(400).send(err)
+         //   req.app.io.emit('Reply' , rep)
+        }else{
+            const rep = new replies({
+                ...req.body , 
+                consultation : req.params.id , 
+                user : req.actor._id
+            })
+            await rep.save()
+            res.status(201).send(rep)
+           // req.app.io.emit('Reply' , rep)
         }
     }) 
 }
@@ -25,116 +31,71 @@ replayConsultation()
 
 
 function updateReply(){
-    replyRouter.patch('/replies/:id' , lawyerAuth , async (req , res) => {
-        const updates = Object.keys(req.body)
-        const allowUpdates = ['body']
-        const isValidOperation = updates.every((update) => allowUpdates.includes(update))
-    
-        if(!isValidOperation){
-            return res.status(400).send({error : 'invalid updates '})
-        }
+    replyRouter.patch('/replies/:id' , generalAuth , async (req , res) => {
 
-        try {   
-            const rep = await replies.findOne({_id : req.params.id , lawyer : req.lawyer._id}) 
-            if(!rep){
-                return res.status(404).send()
-            }
-            updates.forEach((update) => rep[update] = req.body[update] )
-            await rep.save()
-            res.send(rep) 
-          //  req.app.io.emit('updateLawyerReply' , rep)
-            }catch (err) {   
-            res.status(400).send(err) 
-        }
-    })
-}
-
-updateReply()
-
-
-function deleteReply(){// id belongs to the reply itself
-    replyRouter.delete('/replies/:id' , lawyerAuth , async (req , res) => {
         try{
-            const rep = await replies.findOne({_id : req.params.id , lawyer : req.lawyer.id})
-            if(!rep){
-                return res.status(404).send()
+            const updates = Object.keys(req.body)
+            const allowUpdates = ['body']
+            const isValidOperation = updates.every((update) => allowUpdates.includes(update))
+
+            if(!isValidOperation){
+                return res.status(400).send({error : 'invalid updates '})
             }
-            await rep.remove()
-            res.status(200).send(rep)
-          //  req.app.io.emit('deleteLawyerReply' , rep)
-        }catch(err){
-            res.status(404).send(err)
-        }
-    })
-}
 
-deleteReply()
+            if(req.actor.role === 'lawyer'){
+                    const rep = await replies.findOne({_id : req.params.id , lawyer : req.actor._id}) 
+                    if(!rep){
+                        return res.status(404).send()
+                    }
 
+                    updates.forEach((update) => rep[update] = req.body[update] )
+                    await rep.save()
+                    res.send(rep) 
+                //  req.app.io.emit('updateLawyerReply' , rep)
+            }else{
+                const rep = await replies.findOne({_id : req.params.id , user : req.actor._id}) 
 
-function userReplay(){
-    replyRouter.post('/consultations/:id/userReplies', userAuth , async (req , res) => {
-        const rep = new replies({
-            ...req.body , 
-            consultation : req.params.id , 
-            user : req.client._id
-        })
-        try{
-            await (await rep.save()).populate('consultation client').execPopulate()
-            res.status(201).send(rep)
-            req.app.io.emit('userReply' , rep)
+                if(!rep){
+                    return res.status(404).send()
+                }
+
+                updates.forEach((update) => rep[update] = req.body[update] )
+                await rep.save()
+                res.send(rep) 
+                //  req.app.io.emit('updateLawyerReply' , rep)
+            }
         }catch(err){
             res.status(400).send(err)
         }
-    }) 
-}
-
-userReplay()
-
-
-function updateReply(){
-    replyRouter.patch('/userReplies/:id' , userAuth , async (req , res) => {
-        const updates = Object.keys(req.body)
-        const allowUpdates = ['body']
-        const isValidOperation = updates.every((update) => allowUpdates.includes(update))
-    
-        if(!isValidOperation){
-            return res.status(400).send({error : 'invalid updates '})
-        }
-
-        try {   
-            const rep = await replies.findOne({_id : req.params.id , user : req.client._id}) 
-            if(!rep){
-                return res.status(404).send()
-            }
-            updates.forEach((update) => rep[update] = req.body[update] )
-            await rep.save()
-            res.send(rep) 
-           // req.app.io.emit('updateUserReply' , rep)
-            }catch (err) {   
-            res.status(400).send(err) 
-        }
     })
 }
 
 updateReply()
 
 
-function deleteReply(){// id belongs to the reply itself
-    replyRouter.delete('/userReplies/:id' , userAuth , async (req , res) => {
+function deleteReply(){
+    replyRouter.delete('/replies/:id' , generalAuth , async (req , res) => {
         try{
-            const rep = await replies.findOne({_id : req.params.id , user : req.client.id})
-            if(!rep){
-                return res.status(404).send()
+            if(req.actor.role === 'lawyer'){
+                const rep = await replies.findOne({_id : req.params.id , lawyer : req.actor._id})
+                if(!rep){
+                    return res.status(404).send()
+                }
+                await rep.remove()
+                res.status(200).send()
+            }else{
+                const rep = await replies.findOne({_id : req.params.id , user : req.actor._id})
+                if(!rep){
+                    return res.status(404).send()
+                }
+                await rep.remove()
+                res.status(200).send()
             }
-            await rep.remove()
-            res.status(200).send(rep)
-           // req.app.io.emit('deleteUserReply' , rep)
         }catch(err){
-            res.status(404).send(err)
+            res.status(400).send(err)
         }
     })
 }
-
 deleteReply()
 
 
@@ -149,7 +110,6 @@ function repliesCount(){ // every actor can do it so it does not need to sit und
         }catch(err){
             replies.status(400).send(err)
         }
-
     })
 }
 
@@ -182,7 +142,7 @@ function likeReply() {
             reply.likes ++
             await reply.save()
             res.status(200).send(reply)
-            req.app.io.emit('likeReply' , reply)
+            //req.app.io.emit('likeReply' , reply)
         }catch(err){
             res.status(400).send()
         }
@@ -199,7 +159,7 @@ function dislikeReply() {
             reply.dislikes ++
             await reply.save()
             res.status(200).send(reply)
-            req.app.io.emit('disLikeReply' , reply)
+           // req.app.io.emit('disLikeReply' , reply)
         }catch(err){
             res.status(400).send()
         }

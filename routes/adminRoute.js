@@ -2,7 +2,7 @@ const admins = require('../models/admin')
 const lawyers = require('../models/lawyer')
 const clients = require('../models/client')
 const concultations = require('../models/consultation')
-const auth = require('../src/middleware/adminAuth')
+const auth = require('../src/middleware/generalAuth')
 const {registerMail , deleteMail} = require('../src/emails/email')
 const multer = require('multer')
 const sharp = require('sharp')
@@ -176,7 +176,7 @@ function addAdmin(){
     adminRouter.post('/admins/addAdmin' , auth , async (req , res) => {
             try{
                 const admin = new admins(req.body)
-                await registerMail(admin.email , admin.name)
+                //await registerMail(admin.email , admin.name)
                 const token = await admin.authToken()
                 const roletoken = await admin.authToken2()
                 await admin.save()

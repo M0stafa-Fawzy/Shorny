@@ -134,7 +134,7 @@ lawyerSchema.methods.toJSON = function() {
 
 lawyerSchema.methods.authToken = async function () {
     
-    const token = jwt.sign({ _id:this._id.toString() } , process.env.LAWYER_JWT)
+    const token = jwt.sign({ _id:this._id.toString() } , process.env.SECRET_JWT_KEY)
     this.tokens = this.tokens.concat({token})
     await this.save()
     return token
@@ -142,7 +142,7 @@ lawyerSchema.methods.authToken = async function () {
 
 // method for signning the role of the actor
 lawyerSchema.methods.authToken2 = async function () {
-    const roletoken = jwt.sign({ role : this.role} , process.env.LAWYER_JWT)
+    const roletoken = jwt.sign({ role : this.role} , process.env.SECRET_JWT_KEY)
     this.roleToken = roletoken
     await this.save()
     return  roletoken 
