@@ -8,7 +8,7 @@ const auth = async (req, res, next) => {
         // looking for the header 
         const token = req.header('Authorization').replace('Bearer ', '')
         // validate the header and jwt
-        const decoded = jwt.verify(token , process.env.USER_JWT)
+        const decoded = jwt.verify(token , process.env.SECRET_JWT_KEY)
         const client = await clients.findOne({_id : decoded._id , 'tokens.token' : token})
 
         if(!client){

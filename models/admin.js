@@ -97,7 +97,7 @@ adminSchema.methods.toJSON =  function () {
 
 
 adminSchema.statics.findByAlternatives = async (email , password) => {
-    const admin = await Users.findOne( {email} )
+    const admin = await Admins.findOne( {email} )
     if(!admin){
         throw new Error("Admin Doesn't Exist!")
     }

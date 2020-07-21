@@ -2,7 +2,7 @@ const admins = require('../models/admin')
 const lawyers = require('../models/lawyer')
 const clients = require('../models/client')
 const concultations = require('../models/consultation')
-const auth = require('../src/middleware/generalAuth')
+const auth = require('../src/middleware/adminAuth')
 const {registerMail , deleteMail} = require('../src/emails/email')
 const multer = require('multer')
 const sharp = require('sharp')
@@ -16,7 +16,7 @@ function login(){ // Done
         try{
             const admin = await admins.findByAlternatives(req.body.email , req.body.password)
             const token = await admin.authToken()
-            res.status(200).send({ admin , token })
+            res.status(200).send({admin , token})
         } catch(err){
             res.send(err)
         }
@@ -39,7 +39,7 @@ const upload = multer({
 
 
 function uploadProfilePic(){
-    adminRouter.post('/admins/me/profilepicture' , auth , upload.single('profile pic') , async (req , res) => {
+    adminRouter.post('/admins/me/profilepicture' , auth , upload.single('profilepicture') , async (req , res) => {
         const pic = await sharp(req.file.buffer).resize({width : 250 , height : 250}).png().toBuffer()
         req.admin.profile_picture = pic 
         await req.admin.save()
@@ -175,13 +175,16 @@ showAllAdmins()
 function addAdmin(){
     adminRouter.post('/admins/addAdmin' , auth , async (req , res) => {
             try{
-                const admin = new admins(req.body)
-                //await registerMail(admin.email , admin.name)
-                const token = await admin.authToken()
-                const roletoken = await admin.authToken2()
-                await admin.save()
-                res.status(201).send({admin , token , roletoken})
-    
+                if(req.actor.role === 'admin'){
+                    const admin = new admins(req.body)
+                    //await registerMail(admin.email , admin.name)
+                    const token = await admin.authToken()
+                    const roletoken = await admin.authToken2()
+                    await admin.save()
+                    res.status(201).send({admin , token , roletoken})
+                }else{
+                    throw new Error('You cannot add a new Admin')
+                }
             }catch(err){
                 res.status(400).send(err)
             }

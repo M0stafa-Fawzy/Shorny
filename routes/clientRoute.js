@@ -1,7 +1,9 @@
 const clients = require('../models/client')
 const consultations = require('../models/consultation')
 const lawyers = require('../models/lawyer')
+const admins = require('../models/admin')
 const auth = require('../src/middleware/clientAuth')
+const generalAuth = require('../src/middleware/generalAuth')
 const {registerMail , deleteMail , verificationMail } = require('../src/emails/email')
 const express = require('express')
 const multer = require('multer')
@@ -41,6 +43,32 @@ function Login(){
 }
 
 Login()
+
+
+clientRouter.post('/login' , async (req , res) => {
+    try{
+        const cli = await clients.findByAlternatives(req.body.email , req.body.password)
+        const lawyer = await lawyers.findByAlternatives(req.body.email , req.body.password)
+        const admin = await admins.findByAlternatives(req.body.email , req.body.password)
+
+        if(cli){
+            const token = await cli.authToken()
+            res.status(200).send({ cli , token })
+        }else if(lawyer){
+            const token = await cli.authToken()
+            res.status(200).send({ cli , token })
+        }else if(admin){
+            const token = await cli.authToken()
+            res.status(200).send({ cli , token })
+        }else{
+            throw new Error('ERROOOOOOOOOOOOOOOOOOOOOR')
+        }
+        
+    } catch(err){
+        res.status(400).send(err)
+    }
+})
+
 
 function forgetAccount(){
     clientRouter.post('/users/login/identify' , async (req , res) => {
@@ -110,6 +138,7 @@ function checkVerificationCode(){
 
 checkVerificationCode()
 
+
 function updatePassword(){
     clientRouter.post('/users/changepassword' , async (req , res) => {
         try{
@@ -141,18 +170,21 @@ const upload = multer({
 })
 
 
-function uploadProfilePic(){
-    clientRouter.post('/users/me/profilepicture' , auth , upload.single('profile pic') , async (req , res) => {
-        const pic = await sharp(req.file.buffer).resize({width : 250 , height : 250}).png().toBuffer()
-        req.client.profile_picture = pic 
-        await req.client.save()
-        res.send()
-    } , (error , req , res , next) => {
-        res.status(400).send({error : error.message})
-    })
-} 
+// function uploadProfilePic(){
+//     clientRouter.post('/users/me/profilepicture' , auth , upload.single('profilepicture') , async (req , res) => {
+//         const pic = await sharp(req.file.buffer).resize({width : 250 , height : 250}).png().toBuffer()
+//         req.client.profile_picture = pic 
+//         await req.client.save()
+//         res.send()
+//     } , (error , req , res , next) => {
+//         res.status(400).send({error : error.message})
+//     })
+// } 
 
-uploadProfilePic()
+// uploadProfilePic()
+
+
+
 
 
 function deleteProfilePic(){
@@ -167,7 +199,7 @@ deleteProfilePic()
 
 
 function getProfilePic(){
-    clientRouter.get('/users/:id/profilePic' , async (req , res) => {
+    clientRouter.get('/users/:id/profilepicture' , async (req , res) => {
         try{
             const user = await clients.findById(req.params.id)
             if(!user || !user.profile_picture){
@@ -251,10 +283,9 @@ updateProfile()
 
 function deleteAccount(){
     clientRouter.delete('/users/me', auth , async (req, res) => {
-
         try{
             await req.client.remove()
-           // await deleteMail(req.client.email , req.client.name)
+            // await deleteMail(req.client.email , req.client.name)
             res.send(req.client)
         } catch (err) {
             res.status(400).send()

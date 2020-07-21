@@ -159,7 +159,7 @@ lawyerSchema.methods.rateRatio = async function () {
 
 
 lawyerSchema.statics.findByAlternatives = async (email , password) => {
-    const lawyer = await Lawyers.findOne({email})
+    const lawyer = await Lawyers.findOne({email : email})
     if(!lawyer){
         throw new Error("User Doesn't Exist!")
     }
@@ -174,8 +174,10 @@ lawyerSchema.statics.findByAlternatives = async (email , password) => {
 
 lawyerSchema.pre('save' , async function(next){
 
-    this.password = await bcrypt.hash(this.password, 8)
-    next() ; 
+    if(this.isModified('password')){
+        this.password = await bcrypt.hash(this.password , 8)
+    }
+    next()
 })
 
 

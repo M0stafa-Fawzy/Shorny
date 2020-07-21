@@ -6,6 +6,7 @@ const auth = require('../src/middleware/lawyerAuth')
 const {registerMail , deleteMail , verificationMail} = require('../src/emails/email')
 const multer = require('multer')
 const sharp = require('sharp')
+const bcrypt = require('bcryptjs')
 const lawyerRoute = new express.Router()
 
 function signup() {
@@ -33,7 +34,7 @@ function login() {
         try{
             const lawyer = await lawyers.findByAlternatives(req.body.email , req.body.password)
             const token = await lawyer.authToken()
-                res.status(200).send({lawyer , token})
+            res.status(200).send({lawyer , token})
         }catch(err){
             res.status(400).send(err)
         }
@@ -143,7 +144,7 @@ const upload = multer({
 
 
 function uploadProfilePic(){
-    lawyerRoute.post('/lawyers/me/profilepicture' , auth , upload.single('profile pic') , async (req , res) => {
+    lawyerRoute.post('/lawyers/me/profilepicture' , auth , upload.single('profilepicture') , async (req , res) => {
         const pic = await sharp(req.file.buffer).resize({width : 250 , height : 250}).png().toBuffer()
         req.lawyer.profile_picture = pic 
         await req.lawyer.save()

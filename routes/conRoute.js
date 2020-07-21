@@ -1,4 +1,5 @@
 const userAuth = require('../src/middleware/clientAuth')
+const auth = require('../src/middleware/generalAuth')
 const consultations = require('../models/consultation')
 const lawyers = require('../models/lawyer')
 const express = require('express')
@@ -144,7 +145,7 @@ function likeCon() {
             con.likes ++
             await con.save()
             res.status(200).send(con)
-            req.app.io.emit('likeCon' , con)
+           // req.app.io.emit('likeCon' , con)
         }catch(err){
             res.status(400).send()
         }
@@ -161,7 +162,7 @@ function dislikeCon() {
             con.dislikes ++
             await con.save()
             res.status(200).send(con)
-            req.app.io.emit('dislikeCon' , con)
+           // req.app.io.emit('dislikeCon' , con)
         }catch(err){
             res.status(400).send()
         }
