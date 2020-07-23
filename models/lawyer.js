@@ -45,7 +45,7 @@ const lawyerSchema = new mongoose.Schema({
     } , 
     address : {
         type : String , 
-        required : true , 
+       // required : true , 
     } , 
     town : String ,
     region : String
@@ -57,13 +57,13 @@ const lawyerSchema = new mongoose.Schema({
     },
     lawyer_type : {
         type : String , 
-        required : true , 
+       // required : true , 
         trim : true ,
     } , 
     status : {
         type : String , 
         default : 'Available' ,
-        required : true ,
+       // required : true ,
         trim : true , 
     } , 
     rate : {
@@ -98,6 +98,10 @@ const lawyerSchema = new mongoose.Schema({
     }] ,
     profile_picture : {
         type : Buffer
+    } ,
+    doesHavePicture : {
+        type : Boolean , 
+        default : false
     }
 } , {
      timestamps : true
@@ -124,7 +128,6 @@ lawyerSchema.methods.toJSON = function() {
     delete data.consultations
     delete data.profile_picture
     delete data.ID
-    delete data.role
     delete data.__v
 
     return data

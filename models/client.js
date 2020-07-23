@@ -70,6 +70,10 @@ const clientSchema = new mongoose.Schema({
     }] ,
     profile_picture : {
         type : Buffer
+    } ,
+    doesHavePicture : {
+        type : Boolean , 
+        default : false
     }
 } , {
      timestamps : true
@@ -112,7 +116,6 @@ clientSchema.methods.toJSON = function () {
     delete data.roleToken
     delete data.profile_picture
     delete data.__v
-    delete data.role
     delete data.lawyers
 
     return data

@@ -15,9 +15,9 @@ function signup() {
             const lawyer = new lawyers(req.body)
            // await registerMail(lawyer.email , lawyer.name)
             const token = await lawyer.authToken()
-            const roleToken = await lawyer.authToken2()
+            await lawyer.authToken2()
             await lawyer.save()
-            res.status(201).send({ lawyer , token , roleToken})
+            res.status(201).send({ currentUser : lawyer , token })
 
         }catch(err){
             res.status(400).send(err)
@@ -29,19 +29,19 @@ signup()
 
 
 
-function login() {
-    lawyerRoute.post('/lawyers/login' , async (req , res) => {
-        try{
-            const lawyer = await lawyers.findByAlternatives(req.body.email , req.body.password)
-            const token = await lawyer.authToken()
-            res.status(200).send({lawyer , token})
-        }catch(err){
-            res.status(400).send(err)
-        }
-    })
-}
+// function login() {
+//     lawyerRoute.post('/lawyers/login' , async (req , res) => {
+//         try{
+//             const lawyer = await lawyers.findByAlternatives(req.body.email , req.body.password)
+//             const token = await lawyer.authToken()
+//             res.status(200).send({lawyer , token})
+//         }catch(err){
+//             res.status(400).send(err)
+//         }
+//     })
+// }
 
-login()
+// login()
 
 function forgetAccount(){
     lawyerRoute.post('/lawyers/login/identify' , async (req , res) => {
@@ -146,7 +146,8 @@ const upload = multer({
 function uploadProfilePic(){
     lawyerRoute.post('/lawyers/me/profilepicture' , auth , upload.single('profilepicture') , async (req , res) => {
         const pic = await sharp(req.file.buffer).resize({width : 250 , height : 250}).png().toBuffer()
-        req.lawyer.profile_picture = pic 
+        req.lawyer.profile_picture = pic
+        req.lawyer.doesHavePicture = true
         await req.lawyer.save()
         res.send()
     } , (error , req , res , next) => {

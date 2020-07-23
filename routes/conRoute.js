@@ -139,12 +139,19 @@ deleteAllConsultations()
 
 
 function likeCon() {
-    conRouter.post('/consultations/:id/likes' , async (req , res) => {
+    conRouter.post('/consultations/:id/like' , userAuth , async (req , res) => {
         try{
             const con = await consultations.findById(req.params.id)
-            con.likes ++
+            const like = req.body
+            if(like){
+                con.likes.push(req.client._id)
+            }else{
+                con.likes = con.likes.filter((like) => {
+                    return like.userId !== req.client._id
+                })
+            }
             await con.save()
-            res.status(200).send(con)
+            res.status(200).send(con.likes)
            // req.app.io.emit('likeCon' , con)
         }catch(err){
             res.status(400).send()

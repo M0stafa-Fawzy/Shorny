@@ -59,6 +59,10 @@ const adminSchema = new mongoose.Schema({
     } , 
     profile_picture : {
         type : Buffer
+    } ,
+    doesHavePicture : {
+        type : Boolean , 
+        default : false
     }
 } , {
     timestamps : true
@@ -86,7 +90,6 @@ adminSchema.methods.toJSON =  function () {
     const  data = this.toObject()
     delete data.password
     delete data.tokens
-    delete data.role
     delete data.profile_picture
     delete data.role_token
     delete data.__v

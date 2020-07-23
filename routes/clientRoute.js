@@ -17,9 +17,9 @@ function Signup(){
             const client = new clients(req.body)
            // await registerMail(client.email , client.name)
             const token = await client.authToken()
-            const role = await client.authToken2()
+            await client.authToken2()
             await client.save() ; 
-            res.status(201).send({client , token , role})
+            res.status(201).send({currentUser : client , token})
         }catch(err){
             res.status(400).send(err)
         }
@@ -30,44 +30,58 @@ Signup()
 
 
 
-function Login(){
-    clientRouter.post('/users/login' , async (req , res) => {
-        try{
-            const cli = await clients.findByAlternatives(req.body.email , req.body.password)
-            const token = await cli.authToken()
-            res.status(200).send({ cli , token })
-        } catch(err){
-            res.status(400).send(err)
+// function Login(){
+//     clientRouter.post('/users/login' , async (req , res) => {
+//         try{
+//             const cli = await clients.findByAlternatives(req.body.email , req.body.password)
+//             const token = await cli.authToken()
+//             res.status(200).send({ cli , token })
+//         } catch(err){
+//             res.status(400).send(err)
+//         }
+//     })
+// }
+
+// Login()
+
+function login(){
+    clientRouter.post('/login' , async (req , res) => {
+        let cli = await clients.findOne({email : req.body.email})
+        let lawyer = await lawyers.findOne({email : req.body.email})
+        let admin = await admins.findOne({email : req.body.email})
+
+        if(cli){
+            try{
+                cli = await clients.findByAlternatives(req.body.email , req.body.password)
+                const token = await cli.authToken()
+                return res.status(200).send({ currentUser : cli , token })
+            }catch(err){
+                res.status(400).send(err)
+            }
+        }
+        else if(lawyer){
+            try{
+                lawyer = await lawyers.findByAlternatives(req.body.email , req.body.password)
+                const token = await lawyer.authToken()
+                return res.status(200).send({ lawyer , token })
+            }catch(err){
+                res.status(400).send(err)
+            }
+        }else if(admin){
+            try{
+                admin = await admins.findByAlternatives(req.body.email , req.body.password)
+                const token = await admin.authToken()
+                return res.status(200).send({ admin , token })
+            }catch(err){
+                res.status(400).send(err)
+            }
+        }else{
+            return res.status(400).send('')
         }
     })
 }
 
-Login()
-
-
-clientRouter.post('/login' , async (req , res) => {
-    try{
-        const cli = await clients.findByAlternatives(req.body.email , req.body.password)
-        const lawyer = await lawyers.findByAlternatives(req.body.email , req.body.password)
-        const admin = await admins.findByAlternatives(req.body.email , req.body.password)
-
-        if(cli){
-            const token = await cli.authToken()
-            res.status(200).send({ cli , token })
-        }else if(lawyer){
-            const token = await cli.authToken()
-            res.status(200).send({ cli , token })
-        }else if(admin){
-            const token = await cli.authToken()
-            res.status(200).send({ cli , token })
-        }else{
-            throw new Error('ERROOOOOOOOOOOOOOOOOOOOOR')
-        }
-        
-    } catch(err){
-        res.status(400).send(err)
-    }
-})
+login()
 
 
 function forgetAccount(){
@@ -170,18 +184,19 @@ const upload = multer({
 })
 
 
-// function uploadProfilePic(){
-//     clientRouter.post('/users/me/profilepicture' , auth , upload.single('profilepicture') , async (req , res) => {
-//         const pic = await sharp(req.file.buffer).resize({width : 250 , height : 250}).png().toBuffer()
-//         req.client.profile_picture = pic 
-//         await req.client.save()
-//         res.send()
-//     } , (error , req , res , next) => {
-//         res.status(400).send({error : error.message})
-//     })
-// } 
+function uploadProfilePic(){
+    clientRouter.post('/users/me/profilepicture' , auth , upload.single('profilepicture') , async (req , res) => {
+        const pic = await sharp(req.file.buffer).resize({width : 250 , height : 250}).png().toBuffer()
+        req.client.profile_picture = pic 
+        req.client.doesHavePicture = true
+        await req.client.save()
+        res.send()
+    } , (error , req , res , next) => {
+        res.status(400).send({error : error.message})
+    })
+} 
 
-// uploadProfilePic()
+uploadProfilePic()
 
 
 

@@ -9,7 +9,7 @@ const consultatoinSchema = new mongoose.Schema({
         ref : 'client'
     } , law_type : {
         type : String , 
-        required : true , 
+        required : false , 
         trim : true ,
     } , likes : {
         type :  Number ,
@@ -19,11 +19,10 @@ const consultatoinSchema = new mongoose.Schema({
         default : 0 
     } , body : {
         type : String , 
-        required : true , 
-        trim : true ,
+        required : false ,
     } , title : {
-        type : String , 
-        trim : true ,
+        type : String ,
+        maxlength : 200 ,
         required : true
     }  , ready_Lawyers : [{
             lawyer : {
