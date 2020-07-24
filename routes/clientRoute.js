@@ -76,7 +76,7 @@ function login(){
                 res.status(400).send(err)
             }
         }else{
-            return res.status(400).send('')
+            return res.status(400).send()
         }
     })
 }
@@ -312,10 +312,27 @@ deleteAccount()
 
 
 
-function getClientProfileByName(){
-    clientRouter.get('/users/userSearch/:name' , async (req , res) => {
+function getClientProfile(){
+    clientRouter.get('/users/:id' , async (req , res) => {
         try{
-            const client = await clients.find({ name : req.params.name })
+            const client = await clients.findById(req.params.name)
+            if(!client){
+                return res.status(404).send()
+            }
+            res.status(200).send(client)
+        }catch(err){
+            res.status(404).send(err)
+        }
+    })
+}
+
+getClientProfile()
+
+
+function getClientProfileByName(){
+    clientRouter.get('/users/profile/:name' , async (req , res) => {
+        try{
+            const client = await clients.find({name : req.params.name})
             if(!client){
                 return res.status(404).send()
             }
@@ -329,22 +346,21 @@ function getClientProfileByName(){
 getClientProfileByName()
 
 
+// function getLawyerProfileByName(){
+//     clientRouter.get('/users/lawyerSearch/:name' , async (req , res) => {
+//         try{
+//             const lawyer = await lawyers.find({ name : req.params.name })
+//             if(!lawyer){
+//                 return res.status(404).send()
+//             }
+//             res.status(200).send(lawyer)
+//         }catch(err){
+//             res.status(404).send(err)
+//         }
+//     })
+// }
 
-function getLawyerProfileByName(){
-    clientRouter.get('/users/lawyerSearch/:name' , async (req , res) => {
-        try{
-            const lawyer = await lawyers.find({ name : req.params.name })
-            if(!lawyer){
-                return res.status(404).send()
-            }
-            res.status(200).send(lawyer)
-        }catch(err){
-            res.status(404).send(err)
-        }
-    })
-}
-
-getLawyerProfileByName()
+// getLawyerProfileByName()
 
 
 
