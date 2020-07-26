@@ -11,19 +11,14 @@ function rateLawyer(){
             if(!lawyer){
                 return res.status(404).send()
             }
-            const count = await Feedback.countDocuments({user : req.client._id , lawyer : req.params.id})
-            if(count >= 1){
-                return res.status(400).send('you already have giveen your feedback!')
-            }else{
-                const feedback = new Feedback({
-                    ...req.body , 
-                    lawyer : req.params.id , 
-                    user : req.client._id
-                })
-                await feedback.save()
-                await lawyer.rateRatio()
-                res.status(201).send(feedback)
-            }
+            const feedback = new Feedback({
+            ...req.body , 
+            lawyer : req.params.id , 
+            user : req.client._id
+        })
+        await feedback.save()
+        await lawyer.rateRatio()
+        res.status(201).send(feedback)
         }catch(err){
             res.status(400).send(err)
         }

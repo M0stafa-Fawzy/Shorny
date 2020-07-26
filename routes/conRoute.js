@@ -1,6 +1,5 @@
 const userAuth = require('../src/middleware/clientAuth')
-const lawyerAuth = require('../src/middleware/lawyerAuth')
-//const auth = require('../src/middleware/generalAuth')
+const auth = require('../src/middleware/generalAuth')
 const consultations = require('../models/consultation')
 const lawyers = require('../models/lawyer')
 const express = require('express')
@@ -139,52 +138,52 @@ function deleteAllConsultations() {
 deleteAllConsultations() 
 
 
-// function likeCon() {
-//     conRouter.post('/consultations/:id/like' , userAuth , async (req , res) => {
-//         try{
-//             const con = await consultations.findById(req.params.id)
-//             const like = req.body
-//             if(like){
-//                 con.likes.push(req.client._id)
-//             }else{
-//                 con.likes = con.likes.filter((like) => {
-//                     return like.userId.toString() !== req.client._id.toString()
-//                 })
-//             }
-//             await con.save()
-//             res.status(200).send(con.likes)
-//            // req.app.io.emit('likeCon' , con)
-//         }catch(err){
-//             res.status(400).send()
-//         }
-//     })
-// }
+function likeCon() {
+    conRouter.post('/consultations/:id/like' , userAuth , async (req , res) => {
+        try{
+            const con = await consultations.findById(req.params.id)
+            const like = req.body
+            if(like){
+                con.likes.push(req.client._id)
+            }else{
+                con.likes = con.likes.filter((like) => {
+                    return like.userId.toString() !== req.client._id.toString()
+                })
+            }
+            await con.save()
+            res.status(200).send(con.likes)
+           // req.app.io.emit('likeCon' , con)
+        }catch(err){
+            res.status(400).send()
+        }
+    })
+}
 
-// likeCon()
+likeCon()
 
 
-// function dislikeCon() {
-//     conRouter.post('/consultations/:id/dislikes' , async (req , res) => {
-//         try{
-//             const con = await consultations.findById(req.params.id)
-//             const dislike = req.body
-//             if(dislike){
-//                 con.dislikes.push(req.client._id)
-//             }else{
-//                 con.dislikes = con.dislikes.filter((dislike) => {
-//                     return dislike.userId.toString() !== req.client._id.toString()
-//                 })
-//             }
-//             await con.save()
-//             res.status(200).send(con)
-//            // req.app.io.emit('dislikeCon' , con)
-//         }catch(err){
-//             res.status(400).send()
-//         }
-//     })
-// }
+function dislikeCon() {
+    conRouter.post('/consultations/:id/dislikes' , async (req , res) => {
+        try{
+            const con = await consultations.findById(req.params.id)
+            const dislike = req.body
+            if(dislike){
+                con.dislikes.push(req.client._id)
+            }else{
+                con.dislikes = con.dislikes.filter((dislike) => {
+                    return dislike.userId.toString() !== req.client._id.toString()
+                })
+            }
+            await con.save()
+            res.status(200).send(con)
+           // req.app.io.emit('dislikeCon' , con)
+        }catch(err){
+            res.status(400).send()
+        }
+    })
+}
 
-// dislikeCon()
+dislikeCon()
 
 function getAvailableLawyers(){
     conRouter.get('/consultations/:id/AvailableLawyers' , userAuth , async (req , res) => {
@@ -202,27 +201,6 @@ function getAvailableLawyers(){
 }
 
 getAvailableLawyers()
-
-
-function getRecentCons(){
-    conRouter.get('/recent' , lawyerAuth , async (req,res) => {
-        try{
-            const cons = await consultations.find({law_type : req.lawyer.lawyer_type})
-            if(!cons){
-                return res.status(404).send()
-            }
-            res.status(200).send(cons)
-
-        }catch(err){
-            res.status(400).send(err)
-        }
-
-    })
-    
-
-}
-
-getRecentCons()
 
 
 module.exports = conRouter

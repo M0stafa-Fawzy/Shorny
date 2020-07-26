@@ -234,7 +234,7 @@ logoutAll()
 function updateProfile(){
     lawyerRoute.patch('/lawyers/me' , auth , async (req , res) => {
         const updates = Object.keys(req.body)
-        const allowUpdates = ['name' , 'phoneNumber' , 'password' , 'email' , 'lawyer_type' , 'status' , 'twitter_link' , 'facebook_link']
+        const allowUpdates = ['name' , 'phoneNumber' , 'password' , 'email' , 'lawyer_type' , 'status']
         const isValidOperation = updates.every((update) => allowUpdates.includes(update))
     
         if(!isValidOperation){
@@ -269,9 +269,25 @@ function deleteAccount(){
 
 deleteAccount()
 
+function getClientProfile(){
+    lawyerRoute.get('/lawyers/userProfile/:id' , auth , async (req , res) => {
+        try{
+            const client = await clients.findById(req.params.id)
+            if(!client){
+                res.status(404).send()
+            }
+            res.status(200).send(client)
+        }catch(err){
+            res.status(400).send(err)
+        }
+    })
+}
+
+getClientProfile()
+
 
 function getLawyerProfile(){
-    lawyerRoute.get('/lawyers/:id' , auth , async (req , res) => {
+    lawyerRoute.get('/lawyers/profile/:id' , auth , async (req , res) => {
         try{
             const lawyer = await lawyers.findById(req.params.id)
             if(!lawyer){
@@ -287,59 +303,17 @@ function getLawyerProfile(){
 getLawyerProfile()
 
 
-function getLawyerProfileByName(){
-    lawyerRoute.get('/lawyers/profile/:name' , async (req , res) => {
-        try{
-            const lawyer = await lawyers.find({name : req.params.name})
-            if(!lawyer){
-                res.status(404).send()
-            }
-            res.status(200).send(lawyer)
-        }catch(err){
-            res.status(400).send(err)
-        }
-    })
-}
-
-getLawyerProfileByName()
-
-
 // //this function is for showing the ability to take the case
-// function showAbility(){ // id = the id of concultation
-//     lawyerRoute.post('/lawyers/showAbility/:id' , auth , async (req , res ) => {
-//         try{
-//             const con = await consultations.findById(req.params.id)
-//             if(!con){
-//                 return res.status(404).send
-//             }
-//             con.ready_Lawyers = con.ready_Lawyers.concat({_id : req.lawyer._id})
-//             await con.save()
-//             res.status(200).send(con)
-//         }catch(err){
-//             res.status(400).send(err)
-//         }
-//     })
-// }
-
-// showAbility()
-
-
 function showAbility(){ // id = the id of concultation
     lawyerRoute.post('/lawyers/showAbility/:id' , auth , async (req , res ) => {
         try{
             const con = await consultations.findById(req.params.id)
             if(!con){
-                return res.status(404).send()
+                return res.status(404).send
             }
-            if(req.body.value == true){
-                con.ready_Lawyers = con.ready_Lawyers.concat({_id : req.lawyer._id})
-            }else{
-                con.ready_Lawyers = con.ready_Lawyers.filter((like) => {
-                    return like._id.toString() !== req.lawyer._id.toString()
-                })
-            }
+            con.ready_Lawyers = con.ready_Lawyers.concat({_id : req.lawyer._id})
             await con.save()
-            res.status(200).send(ready_Lawyers)
+            res.status(200).send(con)
         }catch(err){
             res.status(400).send(err)
         }
@@ -347,6 +321,7 @@ function showAbility(){ // id = the id of concultation
 }
 
 showAbility()
+
 
 
 function showAssinedCons(){
@@ -391,6 +366,7 @@ function changeStatus(){
             res.status(400).send(err)
         }
     })
+
 }
 
 changeStatus()

@@ -60,24 +60,6 @@ const lawyerSchema = new mongoose.Schema({
        // required : true , 
         trim : true ,
     } , 
-    facebook_link : {
-        type : String , 
-        trim : true ,
-        validate(value){
-            if(!validator.isURL(value)){
-                throw new Error ("It'S not an Facebook Link, Please Enter a Correct One")
-            }
-        }
-    } ,
-    twitter_link : {
-        type : String , 
-        trim : true ,
-        validate(value){
-            if(!validator.isURL(value)){
-                throw new Error ("It'S not an Twitter Link, Please Enter a Correct One")
-            }
-        }
-    } ,
     status : {
         type : String , 
         default : 'Available' ,
@@ -134,14 +116,6 @@ lawyerSchema.virtual('replies' , { // or any aonther name
     foreignField : 'lawyer'
 })
 
-
-lawyerSchema.virtual('consultationss' , { // or any aonther name
-    ref : 'consultation' , // the model you want 
-    // is where is tha local data is stored
-    localField : '_id' , // id is relaton between cons and client
-    // name of property on consultation i wanna to to make relation with
-    foreignField : 'lawyer'
-})
 
 
 lawyerSchema.methods.toJSON = function() {
