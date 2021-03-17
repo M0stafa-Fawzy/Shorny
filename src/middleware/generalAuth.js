@@ -14,15 +14,15 @@ const auth = async (req, res, next) => {
         const lawyer  = await lawyers.findOne({_id : decoded._id , 'tokens.token' : token})
         const admin = await admins.findOne({_id : decoded._id , 'tokens.token' : token})
 
-        if(user){
-            req.token  = token
-            req.actor = user
-        }else  if(lawyer){
-            req.token  = token
-            req.actor = lawyer
-        }else if(admin){
+        if(admin){
             req.token  = token
             req.actor = admin
+        }else  if(lawyer && !user){
+            req.token  = token
+            req.actor = lawyer
+        }else if(user && !lawyer && !admin){
+            req.token  = token
+            req.actor = user
         }else{
             throw new Error('ERRRRRRRRRRROR')
         }

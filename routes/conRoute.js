@@ -1,5 +1,6 @@
 const userAuth = require('../src/middleware/clientAuth')
-const auth = require('../src/middleware/generalAuth')
+const lawyerAuth = require('../src/middleware/lawyerAuth')
+//const auth = require('../src/middleware/generalAuth')
 const consultations = require('../models/consultation')
 const lawyers = require('../models/lawyer')
 const express = require('express')
@@ -142,16 +143,20 @@ function likeCon() {
     conRouter.post('/consultations/:id/like' , userAuth , async (req , res) => {
         try{
             const con = await consultations.findById(req.params.id)
-            const like = req.body
-            if(like){
-                con.likes.push(req.client._id)
-            }else{
+           // const like = req.body
+           if(!con){
+            return res.status(404).send()
+            }
+            if(req.body.value == true){
+                con.likes = con.likes.concat({_id : req.client._id})
+            }
+            else{
                 con.likes = con.likes.filter((like) => {
                     return like.userId.toString() !== req.client._id.toString()
                 })
             }
             await con.save()
-            res.status(200).send(con.likes)
+            res.status(200).send(con)
            // req.app.io.emit('likeCon' , con)
         }catch(err){
             res.status(400).send()
@@ -163,12 +168,11 @@ likeCon()
 
 
 function dislikeCon() {
-    conRouter.post('/consultations/:id/dislikes' , async (req , res) => {
+    conRouter.post('/consultations/:id/dislikes' , userAuth , async (req , res) => {
         try{
             const con = await consultations.findById(req.params.id)
-            const dislike = req.body
-            if(dislike){
-                con.dislikes.push(req.client._id)
+            if(req.body.value == true){
+                con.dislikes = con.dislikes.concat({_id : req.client._id})
             }else{
                 con.dislikes = con.dislikes.filter((dislike) => {
                     return dislike.userId.toString() !== req.client._id.toString()
@@ -201,6 +205,27 @@ function getAvailableLawyers(){
 }
 
 getAvailableLawyers()
+
+
+function getRecentCons(){
+    conRouter.get('/recent' , lawyerAuth , async (req,res) => {
+        try{
+            const cons = await consultations.find({law_type : req.lawyer.lawyer_type})
+            if(!cons){
+                return res.status(404).send()
+            }
+            res.status(200).send(cons)
+
+        }catch(err){
+            res.status(400).send(err)
+        }
+
+    })
+    
+
+}
+
+getRecentCons()
 
 
 module.exports = conRouter

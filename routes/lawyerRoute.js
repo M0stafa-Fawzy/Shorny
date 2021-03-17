@@ -3,10 +3,10 @@ const lawyers = require('../models/lawyer')
 const clients = require('../models/client')
 const consultations = require('../models/consultation')
 const auth = require('../src/middleware/lawyerAuth')
+const generalAuth = require('../src/middleware/generalAuth')
 const {registerMail , deleteMail , verificationMail} = require('../src/emails/email')
 const multer = require('multer')
 const sharp = require('sharp')
-const bcrypt = require('bcryptjs')
 const lawyerRoute = new express.Router()
 
 function signup() {
@@ -28,21 +28,6 @@ function signup() {
 signup()
 
 
-
-// function login() {
-//     lawyerRoute.post('/lawyers/login' , async (req , res) => {
-//         try{
-//             const lawyer = await lawyers.findByAlternatives(req.body.email , req.body.password)
-//             const token = await lawyer.authToken()
-//             res.status(200).send({lawyer , token})
-//         }catch(err){
-//             res.status(400).send(err)
-//         }
-//     })
-// }
-
-// login()
-
 function forgetAccount(){
     lawyerRoute.post('/lawyers/login/identify' , async (req , res) => {
         try{
@@ -53,7 +38,6 @@ function forgetAccount(){
             }
 
             const code = Math.random().toString(20).substr(2 , 7)
-
             await verificationMail(req.body.email , code)
 
             lawyer.accessCode = code
@@ -131,110 +115,11 @@ function updatePassword(){
 updatePassword()
 
 
-const upload = multer({
-    limits : {
-        fileSize : 1000000
-    } , fileFilter (req , file , cb) {
-        if(!file.originalname.match(/\.(jpg|jpes|png)$/)){
-            return cb(new Error('picture format not matched , please upload jpg,jpes or png image'))
-        }
-        cb(undefined , true)
-    }
-})
-
-
-function uploadProfilePic(){
-    lawyerRoute.post('/lawyers/me/profilepicture' , auth , upload.single('profilepicture') , async (req , res) => {
-        const pic = await sharp(req.file.buffer).resize({width : 250 , height : 250}).png().toBuffer()
-        req.lawyer.profile_picture = pic
-        req.lawyer.doesHavePicture = true
-        await req.lawyer.save()
-        res.send()
-    } , (error , req , res , next) => {
-        res.status(400).send({error : error.message})
-    })
-} 
-
-uploadProfilePic()
-
-
-function deleteProfilePic(){
-    lawyerRoute.delete('/lawyers/me/profilepicture' , auth , async (req , res) => {
-        req.lawyer.profile_picture = undefined
-        await req.lawyer.save()
-        res.send()
-    })
-}
-
-deleteProfilePic()
-
-
-function getProfilePic(){
-    lawyerRoute.get('/lawyers/:id/profilePic' , async (req , res) => {
-        try{
-            const lawyer = await lawyers.findById(req.params.id)
-            if(!lawyer || !lawyer.profile_picture){
-                throw new Error()
-            }
-            res.set('Content-Type' , 'image/png')
-            res.send(lawyer.profile_picture)
-        }catch(err){
-            res.status(400).send(err)
-        }
-    })
-}
-
-getProfilePic()
-
-
-function showMyProfile(){
-    lawyerRoute.get('/lawyers/me' , auth , (req , res) => {
-        res.send(req.lawyer)
-    })
-}
-
-showMyProfile()
-
-
-function logout(){
-    lawyerRoute.post('/lawyers/logout', auth , async (req , res) => {
-        try {
-            // just remove a index form tokens array
-              req.lawyer.tokens = req.lawyer.tokens.filter((token) => {
-                  return token.token !== req.token
-              })
-              await req.lawyer.save()
-              res.status(200).send()
-
-          } catch (err) {
-              res.status(400).send()
-          }
-    })
-}
-
-logout()
-
-
-function logoutAll(){
-    lawyerRoute.post('/lawyers/logoutAll', auth , async (req , res) => {
-        try {
-            req.lawyer.tokens = []
-            await req.lawyer.save()
-            res.send()
-        } catch (err) {
-            res.status(400).send()
-        }
-    })
-
-}
-
-logoutAll()
-
 
 function updateProfile(){
     lawyerRoute.patch('/lawyers/me' , auth , async (req , res) => {
         const updates = Object.keys(req.body)
-        const allowUpdates = ['name' , 'phoneNumber' , 'password' , 'email' , 'lawyer_type' , 'status']
+        const allowUpdates = ['name' , 'phoneNumber' , 'password' , 'email' , 'lawyer_type' , 'status' , 'twitter_link' , 'facebook_link']
         const isValidOperation = updates.every((update) => allowUpdates.includes(update))
     
         if(!isValidOperation){
@@ -255,41 +140,10 @@ function updateProfile(){
 updateProfile()
 
 
-function deleteAccount(){
-    lawyerRoute.delete('/lawyers/me' , auth , async (req , res) => {
+function getLawyerProfileByName(){
+    lawyerRoute.get('/lawyers/profile/:name' , async (req , res) => {
         try{
-            await req.lawyer.remove()
-            //await deleteMail(req.lawyer.email , req.lawyer.name)
-            res.send(req.lawyer)
-        } catch (err) {
-            res.status(500).send()
-        }
-    })
-}
-
-deleteAccount()
-
-function getClientProfile(){
-    lawyerRoute.get('/lawyers/userProfile/:id' , auth , async (req , res) => {
-        try{
-            const client = await clients.findById(req.params.id)
-            if(!client){
-                res.status(404).send()
-            }
-            res.status(200).send(client)
-        }catch(err){
-            res.status(400).send(err)
-        }
-    })
-}
-
-getClientProfile()
-
-
-function getLawyerProfile(){
-    lawyerRoute.get('/lawyers/profile/:id' , auth , async (req , res) => {
-        try{
-            const lawyer = await lawyers.findById(req.params.id)
+            const lawyer = await lawyers.find({name : req.params.name})
             if(!lawyer){
                 res.status(404).send()
             }
@@ -300,20 +154,45 @@ function getLawyerProfile(){
     })
 }
 
-getLawyerProfile()
+getLawyerProfileByName()
 
 
 // //this function is for showing the ability to take the case
+// function showAbility(){ // id = the id of concultation
+//     lawyerRoute.post('/lawyers/showAbility/:id' , auth , async (req , res ) => {
+//         try{
+//             const con = await consultations.findById(req.params.id)
+//             if(!con){
+//                 return res.status(404).send
+//             }
+//             con.ready_Lawyers = con.ready_Lawyers.concat({_id : req.lawyer._id})
+//             await con.save()
+//             res.status(200).send(con)
+//         }catch(err){
+//             res.status(400).send(err)
+//         }
+//     })
+// }
+
+// showAbility()
+
+
 function showAbility(){ // id = the id of concultation
     lawyerRoute.post('/lawyers/showAbility/:id' , auth , async (req , res ) => {
         try{
             const con = await consultations.findById(req.params.id)
             if(!con){
-                return res.status(404).send
+                return res.status(404).send()
             }
-            con.ready_Lawyers = con.ready_Lawyers.concat({_id : req.lawyer._id})
+            if(req.body.value == true){
+                con.ready_Lawyers = con.ready_Lawyers.concat({_id : req.lawyer._id})
+            }else{
+                con.ready_Lawyers = con.ready_Lawyers.filter((lawyer) => {
+                    return lawyer._id.toString() !== req.lawyer._id.toString()
+                })
+            }
             await con.save()
-            res.status(200).send(con)
+            res.status(200).send(ready_Lawyers)
         }catch(err){
             res.status(400).send(err)
         }
@@ -321,7 +200,6 @@ function showAbility(){ // id = the id of concultation
 }
 
 showAbility()
-
 
 
 function showAssinedCons(){
@@ -366,7 +244,6 @@ function changeStatus(){
             res.status(400).send(err)
         }
     })
-
 }
 
 changeStatus()

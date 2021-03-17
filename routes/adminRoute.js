@@ -3,6 +3,7 @@ const lawyers = require('../models/lawyer')
 const clients = require('../models/client')
 const concultations = require('../models/consultation')
 const auth = require('../src/middleware/adminAuth')
+const generalAuth = require('../src/middleware/generalAuth')
 const {registerMail , deleteMail} = require('../src/emails/email')
 const multer = require('multer')
 const sharp = require('sharp')
@@ -10,58 +11,6 @@ const express = require('express')
 
 const adminRouter = new express.Router()
 
-
-// function login(){ // Done
-//     adminRouter.post('/admins/login' , async (req , res) => {
-//         try{
-//             const admin = await admins.findByAlternatives(req.body.email , req.body.password)
-//             const token = await admin.authToken()
-//             res.status(200).send({admin , token})
-//         } catch(err){
-//             res.send(err)
-//         }
-//     })
-// }
-
-// login()
-
-
-const upload = multer({
-    limits : {
-        fileSize : 1000000
-    } , fileFilter (req , file , cb) {
-        if(!file.originalname.match(/\.(jpg|jpes|png)$/)){
-            return cb(new Error('picture format not matched , please upload jpg,jpes or png image'))
-        }
-        cb(undefined , true)
-    }
-})
-
-
-function uploadProfilePic(){
-    adminRouter.post('/admins/me/profilepicture' , auth , upload.single('profilepicture') , async (req , res) => {
-        const pic = await sharp(req.file.buffer).resize({width : 250 , height : 250}).png().toBuffer()
-        req.admin.profile_picture = pic 
-        req.admin.doesHavePicture = true
-        await req.admin.save()
-        res.send()
-    } , (error , req , res , next) => {
-        res.status(400).send({error : error.message})
-    })
-} 
-
-uploadProfilePic()
-
-
-function deleteProfilePic(){
-    adminRouter.delete('/admins/me/profilepicture' , auth , async (req , res) => {
-        req.admin.profile_picture = undefined
-        await req.admin.save()
-        res.send()
-    })
-}
-
-deleteProfilePic()
 
 
 function getProfilePic(){
@@ -80,34 +29,6 @@ function getProfilePic(){
 }
 
 getProfilePic()
-
-
-
-function logout(){ // Done
-    adminRouter.post('/admins/logout' , auth , async (req , res) => {
-        try {
-            // just remove a index form tokens array
-            req.admin.tokens = req.admin.tokens.filter((token) => {
-            return token.token !== req.token
-            })
-            await req.admin.save()
-            res.send()
-        } catch (err) {
-            res.status(400).send()
-        }
-    })
-}
-
-logout()
-
-
-function showMyProfile(){
-    adminRouter.get('/admins/me' , auth , async (req , res) => {
-        res.send(req.admin)
-    })
-}
-
-showMyProfile()
 
 
 function updateProfile(){ // Done 
@@ -140,21 +61,6 @@ function updateProfile(){ // Done
 updateProfile()
 
 
-function deleteAccount(){ // done
-    adminRouter.delete('/admins/me' , auth , async (req , res) => {
-        try{
-            await req.admin.remove()
-            await deleteMail(req.admin.email , req.admin.name)
-            res.send()
-        }catch(err){
-            res.status(400).send(err)
-        }
-    })
-}
-
-deleteAccount()
-
-
 function showAllAdmins(){ // done
     adminRouter.get('/admins' , auth , async (req , res ) => {
         try {
@@ -174,7 +80,7 @@ showAllAdmins()
 
 
 function addAdmin(){
-    adminRouter.post('/admins/addAdmin' , auth , async (req , res) => {
+    adminRouter.post('/admins/addAdmin' , generalAuth , async (req , res) => {
             try{
                 const admin = new admins(req.body)
                 //await registerMail(admin.email , admin.name)
@@ -191,21 +97,21 @@ function addAdmin(){
 addAdmin()
 
 
-function addUser(){ // done
-    adminRouter.post('/admins/user' , auth , async (req , res) => {
-        try{
-            const cli = new clients(req.body)
-            const token = await cli.autnToken()
-            const roletoken = await cli.autnToken2()
-            await cli.save()
-            res.status(201).send({ cli , token , roletoken})
-        }catch(err){
-            res.status(400).send(err)
-        }
-    })
-}
+// function addUser(){ // done
+//     adminRouter.post('/admins/user' , auth , async (req , res) => {
+//         try{
+//             const cli = new clients(req.body)
+//             const token = await cli.autnToken()
+//             const roletoken = await cli.autnToken2()
+//             await cli.save()
+//             res.status(201).send({ cli , token , roletoken})
+//         }catch(err){
+//             res.status(400).send(err)
+//         }
+//     })
+// }
 
-addUser()
+// addUser()
 
 
 function deleteClient(){
@@ -241,22 +147,22 @@ function showAllClients(){
 showAllClients()
 
 
-function addLawyer(){
-    adminRouter.post('/admins/lawyer' , auth , async (req , res) => {
-        try{
-            const lawyer = new lawyers(req.body)
-            const token = await lawyer.autnToken()
-            const roletoken = await lawyer.autnToken2()
-            await lawyer.save()
-            res.status(201).send({lawyer, token , roletoken})
+// function addLawyer(){
+//     adminRouter.post('/admins/lawyer' , auth , async (req , res) => {
+//         try{
+//             const lawyer = new lawyers(req.body)
+//             const token = await lawyer.autnToken()
+//             const roletoken = await lawyer.autnToken2()
+//             await lawyer.save()
+//             res.status(201).send({lawyer, token , roletoken})
 
-        }catch(err){
-            res.status(400).send(err)
-        }
-    })
-}
+//         }catch(err){
+//             res.status(400).send(err)
+//         }
+//     })
+// }
 
-addLawyer()
+// addLawyer()
 
 
 

@@ -3,11 +3,8 @@ const consultations = require('../models/consultation')
 const lawyers = require('../models/lawyer')
 const admins = require('../models/admin')
 const auth = require('../src/middleware/clientAuth')
-const generalAuth = require('../src/middleware/generalAuth')
 const {registerMail , deleteMail , verificationMail } = require('../src/emails/email')
 const express = require('express')
-const multer = require('multer')
-const sharp = require('sharp')
 const clientRouter = new express.Router()
 
 
@@ -28,60 +25,6 @@ function Signup(){
 
 Signup()
 
-
-
-// function Login(){
-//     clientRouter.post('/users/login' , async (req , res) => {
-//         try{
-//             const cli = await clients.findByAlternatives(req.body.email , req.body.password)
-//             const token = await cli.authToken()
-//             res.status(200).send({ cli , token })
-//         } catch(err){
-//             res.status(400).send(err)
-//         }
-//     })
-// }
-
-// Login()
-
-function login(){
-    clientRouter.post('/login' , async (req , res) => {
-        let cli = await clients.findOne({email : req.body.email})
-        let lawyer = await lawyers.findOne({email : req.body.email})
-        let admin = await admins.findOne({email : req.body.email})
-
-        if(cli){
-            try{
-                cli = await clients.findByAlternatives(req.body.email , req.body.password)
-                const token = await cli.authToken()
-                return res.status(200).send({ currentUser : cli , token })
-            }catch(err){
-                res.status(400).send(err)
-            }
-        }
-        else if(lawyer){
-            try{
-                lawyer = await lawyers.findByAlternatives(req.body.email , req.body.password)
-                const token = await lawyer.authToken()
-                return res.status(200).send({ lawyer , token })
-            }catch(err){
-                res.status(400).send(err)
-            }
-        }else if(admin){
-            try{
-                admin = await admins.findByAlternatives(req.body.email , req.body.password)
-                const token = await admin.authToken()
-                return res.status(200).send({ admin , token })
-            }catch(err){
-                res.status(400).send(err)
-            }
-        }else{
-            return res.status(400).send('')
-        }
-    })
-}
-
-login()
 
 
 function forgetAccount(){
@@ -152,126 +95,22 @@ function checkVerificationCode(){
 
 checkVerificationCode()
 
+// function getProfilePic(){
+//     clientRouter.get('/lawyers/:id/profilePic' , async (req , res) => {
+//         try{
+//             const lawyer = await lawyers.findById(req.params.id)
+//             if(!lawyer || !lawyer.profile_picture){
+//                 throw new Error()
+//             }
+//             res.set('Content-Type' , 'image/png')
+//             res.send(lawyer.profile_picture)
+//         }catch(err){
+//             res.status(400).send(err)
+//         }
+//     })
+// }
 
-function updatePassword(){
-    clientRouter.post('/users/changepassword' , async (req , res) => {
-        try{
-
-            const user = await clients.findOne({email : req.body.email})
-            user.password = req.body.password
-
-            await user.save()
-            res.status(200).send(user)
-
-        }catch(err){
-            res.send(400).send(err)
-        }
-    })
-
-}
-
-updatePassword()
-
-const upload = multer({
-    limits : {
-        fileSize : 1000000
-    } , fileFilter (req , file , cb) {
-        if(!file.originalname.match(/\.(jpg|jpes|png)$/)){
-            return cb(new Error('picture format not matched , please upload jpg,jpes or png image'))
-        }
-        cb(undefined , true)
-    }
-})
-
-
-function uploadProfilePic(){
-    clientRouter.post('/users/me/profilepicture' , auth , upload.single('profilepicture') , async (req , res) => {
-        const pic = await sharp(req.file.buffer).resize({width : 250 , height : 250}).png().toBuffer()
-        req.client.profile_picture = pic 
-        req.client.doesHavePicture = true
-        await req.client.save()
-        res.send()
-    } , (error , req , res , next) => {
-        res.status(400).send({error : error.message})
-    })
-} 
-
-uploadProfilePic()
-
-
-
-
-
-function deleteProfilePic(){
-    clientRouter.delete('/users/me/profilepicture' , auth , async (req , res) => {
-        req.client.profile_picture = undefined
-        await req.client.save()
-        res.send()
-    })
-}
-
-deleteProfilePic()
-
-
-function getProfilePic(){
-    clientRouter.get('/users/:id/profilepicture' , async (req , res) => {
-        try{
-            const user = await clients.findById(req.params.id)
-            if(!user || !user.profile_picture){
-                throw new Error()
-            }
-            res.set('Content-Type' , 'image/png')
-            res.send(user.profile_picture)
-        }catch(err){
-            res.status(400).send(err)
-        }
-    })
-}
-
-getProfilePic()
-
-
-function showMyProfile(){
-    clientRouter.get('/users/me' , auth , async (req , res) => {
-        res.send(req.client)
-    })
-}
-
-showMyProfile()
-
-
-function logout(){
-    clientRouter.post('/users/logout', auth , async (req, res)=> {
-        try {
-          // just remove a index form tokens array
-            req.client.tokens = req.client.tokens.filter((token) => {
-                return token.token !== req.token
-            })
-            await req.client.save()
-            res.send()
-        } catch (err) {
-            res.status(400).send()
-        }
-    })
-}
-
-logout()
-
-
-function logoutAll(){
-    clientRouter.post('/users/logoutAll' , auth , async (req, res) => {
-            try {
-                req.client.tokens = []
-                await req.client.save()
-                res.send()
-            } catch (err) {
-                res.status(400).send()
-            }
-        })
-}
-
-logoutAll()
-
+// getProfilePic()
 
 function updateProfile() {
     clientRouter.patch('/users/me', auth , async (req, res) => {
@@ -294,57 +133,6 @@ function updateProfile() {
 }
 
 updateProfile()
-
-
-function deleteAccount(){
-    clientRouter.delete('/users/me', auth , async (req, res) => {
-        try{
-            await req.client.remove()
-            // await deleteMail(req.client.email , req.client.name)
-            res.send(req.client)
-        } catch (err) {
-            res.status(400).send()
-        }
-    })
-}
-
-deleteAccount() 
-
-
-
-function getClientProfileByName(){
-    clientRouter.get('/users/userSearch/:name' , async (req , res) => {
-        try{
-            const client = await clients.find({ name : req.params.name })
-            if(!client){
-                return res.status(404).send()
-            }
-            res.status(200).send(client)
-        }catch(err){
-            res.status(404).send(err)
-        }
-    })
-}
-
-getClientProfileByName()
-
-
-
-function getLawyerProfileByName(){
-    clientRouter.get('/users/lawyerSearch/:name' , async (req , res) => {
-        try{
-            const lawyer = await lawyers.find({ name : req.params.name })
-            if(!lawyer){
-                return res.status(404).send()
-            }
-            res.status(200).send(lawyer)
-        }catch(err){
-            res.status(404).send(err)
-        }
-    })
-}
-
-getLawyerProfileByName()
 
 
 
@@ -497,9 +285,9 @@ showAssinedLawyer()
 //  })
 
 // clientRouter.get('/test' , async function (req , mo) {
-//     const cli = await clients.findOne({name : "Virgil"}).select('email name')
+//     const cli = await clients.find({role : "user"}).select('email name')
 //     mo.json(cli)
-//     req.app.io.emit('users' , cli)
+//     console.log(cli)
 // })
 
 

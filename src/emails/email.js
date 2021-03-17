@@ -24,7 +24,7 @@ const deleteMail = (email , name) => {
 
 const verificationMail = (email , code) => {
 
-    return sgMail.send({
+    sgMail.send({
         to : email , 
         from : 'mostafafawzy471@gmail.com' , 
         subject : 'verification Code', 

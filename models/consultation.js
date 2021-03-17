@@ -11,18 +11,20 @@ const consultatoinSchema = new mongoose.Schema({
         type : String , 
         required : false , 
         trim : true ,
-    } , likes : [{
+    } , 
+    likes : [{
             userId : {
-                type : String , 
-                required : true
+                type : mongoose.Schema.Types.ObjectId , 
+                ref : 'client' , 
             }
     }]
-     , dislikes : [{
+    , dislikes : [{
             userId : {
-                type : String , 
-                required : true
+                type : mongoose.Schema.Types.ObjectId , 
+                ref : 'client' , 
             }
-     }] , body : {
+     }] , 
+     body : {
         type : String , 
         required : false ,
     } , title : {
