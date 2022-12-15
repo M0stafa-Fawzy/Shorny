@@ -230,7 +230,7 @@ module.exports = {
 //     lawyerRoute.get('/lawyers/consultations', auth, async (req, res) => {
 //         try {
 //             const cons = await consultations.find({ _id: req.lawyer.consultations })
-//             //await cons.populate('client').execPopulate()
+//             .populate('client').execPopulate()
 //             res.status(200).send(cons)
 //         } catch (err) {
 //             res.status(404).send(err)
