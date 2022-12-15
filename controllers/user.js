@@ -114,6 +114,107 @@ const forgetPassword = async (req, res, next) => {
     }
 }
 
+const getUserProfileByID = async (req, res, next) => {
+    try {
+        const { id } = req.params
+        const user = await User.findById(id)
+
+        if (!user) throw new CustomError("user doesn't found", 400)
+        return res.status(200).jsoon({ user })
+    } catch (error) {
+        next(error)
+    }
+}
+
+// function showReadyLawyer() {
+//     clientRouter.get('/users/ready/:id', auth, async (req, res) => {
+//         try {
+//             const con = await consultations.findOne({ _id: req.params.id, client: req.client._id })
+//             if (!con) {
+//                 return res.status(404).send()
+//             }
+//             const readr_Lawyers = await lawyers.find({ _id: con.ready_Lawyers })
+//             if (!readr_Lawyers) {
+//                 return res.status(404).send()
+//             }
+//             res.status(200).send(readr_Lawyers)
+//         } catch (err) {
+//             res.status(400).send(err)
+//         }
+//     })
+// }
+
+// showReadyLawyer()
+
+
+
+// function assignLawyerToCon() {
+//     clientRouter.post('/users/:conID/lawyer/:id', auth, async (req, res) => {
+//         try {
+//             const con = await consultations.findById(req.params.conID)
+//             if (con.client != req.client.id) {
+//                 return res.status(401).send()
+//             }
+//             const lawyer = await lawyers.findById(req.params.id)
+//             if (!lawyer) {
+//                 return res.status(404).send()
+//             }
+//             lawyer.User = lawyer.User.concat({ _id: req.client._id })
+//             req.client.lawyers = req.client.lawyers.concat({ _id: req.params.id })
+//             lawyer.consultations = lawyer.consultations.concat({ _id: req.params.conID })
+//             await lawyer.save()
+//             await req.client.save()
+//             res.status(200).send(lawyer)
+//         } catch (err) {
+//             res.status(400).send(err)
+//         }
+//     })
+// }
+
+// assignLawyerToCon()
+
+// //this function is for showing the ability to take the case
+// function showAbility(){ // id = the id of concultation
+//     lawyerRoute.post('/lawyers/showAbility/:id' , auth , async (req , res ) => {
+//         try{
+//             const con = await consultations.findById(req.params.id)
+//             if(!con){
+//                 return res.status(404).send
+//             }
+//             con.ready_Lawyers = con.ready_Lawyers.concat({_id : req.lawyer._id})
+//             await con.save()
+//             res.status(200).send(con)
+//         }catch(err){
+//             res.status(400).send(err)
+//         }
+//     })
+// }
+
+// showAbility()
+
+// function showAbility() { // id = the id of concultation
+//     lawyerRoute.post('/lawyers/showAbility/:id', auth, async (req, res) => {
+//         try {
+//             const con = await consultations.findById(req.params.id)
+//             if (!con) {
+//                 return res.status(404).send()
+//             }
+//             if (req.body.value == true) {
+//                 con.ready_Lawyers = con.ready_Lawyers.concat({ _id: req.lawyer._id })
+//             } else {
+//                 con.ready_Lawyers = con.ready_Lawyers.filter((lawyer) => {
+//                     return lawyer._id.toString() !== req.lawyer._id.toString()
+//                 })
+//             }
+//             await con.save()
+//             res.status(200).send(ready_Lawyers)
+//         } catch (err) {
+//             res.status(400).send(err)
+//         }
+//     })
+// }
+
+// showAbility()
 module.exports = {
     signup,
     login,
@@ -121,5 +222,20 @@ module.exports = {
     updateProfile,
     deleteAccount,
     verifyUser,
-    forgetPassword
+    forgetPassword,
+    getUserProfileByID
 }
+
+// function showAssinedCons() {
+//     lawyerRoute.get('/lawyers/consultations', auth, async (req, res) => {
+//         try {
+//             const cons = await consultations.find({ _id: req.lawyer.consultations })
+//             //await cons.populate('client').execPopulate()
+//             res.status(200).send(cons)
+//         } catch (err) {
+//             res.status(404).send(err)
+//         }
+//     })
+// }
+
+// showAssinedCons()

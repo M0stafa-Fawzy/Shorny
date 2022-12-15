@@ -5,10 +5,13 @@ const {
     getProfileData,
     updateProfile,
     deleteAccount,
-    verifyUser
+    verifyUser,
+    getUserProfileByID
 } = require("../controllers/user")
+const { auth } = require("../src/middleware/auth")
 
-router.route('/').post(signup).get(getProfileData).put(updateProfile).delete(deleteAccount)
+router.route('/').post(signup).get(auth, getProfileData).put(auth, updateProfile).delete(auth, deleteAccount)
+router.post("/:id", getUserProfileByID)
 router.post("/login", login)
 router.post("/verify", verifyUser)
 

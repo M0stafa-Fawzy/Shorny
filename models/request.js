@@ -1,39 +1,35 @@
-require('../src/db/mongoose')
-const mongoose = require ('mongoose') 
-const validator = require('validator')
-const bcrypt = require('bcryptjs')
-const jwt = require('jsonwebtoken') 
+const mongoose = require('mongoose')
 
 const requestSchema = new mongoose.Schema({
-    ID : {
-        type : Number , 
-        required : true , 
-        trim : true , 
-        unique : true , 
-    } , lawyeer_ID : {
-        type : Number , 
-        required : true , 
-        trim : true , 
-    } , user_ID : {
-        type : Number , 
-        required : true , 
-        trim : true , 
-    } , destination_ID : {
-        type : Number , 
-        required : true , 
-        trim : true , 
+    ID: {
+        type: Number,
+        required: true,
+        trim: true,
+        unique: true,
+    }, lawyeer_ID: {
+        type: Number,
+        required: true,
+        trim: true,
+    }, user_ID: {
+        type: Number,
+        required: true,
+        trim: true,
+    }, destination_ID: {
+        type: Number,
+        required: true,
+        trim: true,
     }
 })
 
-const Requests = mongoose.model('request' , requestSchema)
+const Requests = mongoose.model('request', requestSchema)
 
-module.exports = Requests ; 
+module.exports = Requests;
 
 // const re = new Requests({
-//     ID : 10 , 
-//     lawyeer_ID : 11 , 
-//     user_ID : 12 , 
-//     destination_ID : 13 
+//     ID : 10 ,
+//     lawyeer_ID : 11 ,
+//     user_ID : 12 ,
+//     destination_ID : 13
 // })
 
 // re.save() ; 
