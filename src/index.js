@@ -11,6 +11,10 @@ const consultations = require('../routes/consultation')
 const replies = require('../routes/reply')
 const rate = require('../routes/ratting')
 
+app.get("/", (req, res) => {
+    res.send("<h1>Shorny Application</h1>")
+})
+
 app.use('/users', users)
 app.use('/consultations', consultations)
 app.use('/replies', replies)
