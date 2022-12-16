@@ -1,12 +1,13 @@
 const mongoose = require('mongoose')
 const replies = require('./replies')
 
-const consultatoinSchema = new mongoose.Schema({
-    client: {
+const consultationSchema = new mongoose.Schema({
+    user: {
         type: mongoose.Schema.Types.ObjectId,
         required: true,
         ref: 'user'
-    }, law_type: {
+    },
+    law_type: {
         type: String,
         required: true
     },
@@ -36,15 +37,13 @@ const consultatoinSchema = new mongoose.Schema({
     }]
 })
 
-consultatoinSchema.pre('remove', async function (next) {
-    const { ObjectId } = require('mongoose')
-    await replies.deleteMany({ consultation: new ObjectId(this._id) })
-
+consultationSchema.pre('remove', async function (next) {
+    await replies.deleteMany({ consultation: new mongoose.ObjectId(this._id) })
     next()
 })
 
 
-const Concultation = mongoose.model('consultation', consultatoinSchema)
+const Consultation = mongoose.model('consultation', consultationSchema)
 
-module.exports = Concultation;
+module.exports = Consultation;
 

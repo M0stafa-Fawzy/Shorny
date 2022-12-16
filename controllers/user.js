@@ -17,9 +17,7 @@ const signup = async (req, res, next) => {
             role,
             otp: generateOTP()
         })
-
-        if (!user) throw new CustomError("User doesn't created", 400)
-        // registerMail(user.email , user.username)
+        // registerMail(user.email, user.username)
         // verificationMail(user.email, user.otp)
         return res.status(201).json({ user, token: user.authToken() })
     } catch (error) {
@@ -51,10 +49,11 @@ const getProfileData = async (req, res, next) => {
 
 const updateProfile = async (req, res, next) => {
     try {
-        const { username, email, password, phoneNumber, profile_picture, address, specialize } = req.body
+        const { id } = req
+        const { username, email, password, phoneNumber, address, specialize } = req.body
         const user = await User.findByIdAndUpdate(
             id,
-            { username, email, password, phoneNumber, profile_picture, address, specialize },
+            { username, email, password, phoneNumber, address, specialize },
             { new: true, runValidators: true }
         )
 
@@ -70,11 +69,14 @@ const verifyUser = async (req, res, next) => {
         const { email, otp } = req.body
         if (!email || !otp) throw new CustomError("email and verification code are required", 400)
 
-        const user = await User.findOne({ email })
+        let user = await User.findOne({ email })
         if (!user) throw new CustomError("user doesn't exist", 401)
 
+        if (user.status == 'verified') throw new CustomError("user is already verified", 400)
         if (otp != user.otp) throw new CustomError("wrong verification code", 401)
-        return res.status(200).json({ user, token: user.authToken() })
+
+        user = await User.findOneAndUpdate({ email }, { status: 'verified' }, { new: true, runValidators: true })
+        return res.status(200).json({ message: 'account verified successfully', user, token: user.authToken() })
     } catch (error) {
         next(error)
     }
@@ -239,3 +241,23 @@ module.exports = {
 // }
 
 // showAssinedCons()
+
+// function getRecentCons() {
+//     conRouter.get('/recent', async (req, res) => {
+//         try {
+//             const cons = await consultations.find({ law_type: req.lawyer.lawyer_type })
+//             if (!cons) {
+//                 return res.status(404).send()
+//             }
+//             res.status(200).send(cons)
+
+//         } catch (err) {
+//             res.status(400).send(err)
+//         }
+
+//     })
+
+
+// }
+
+// getRecentCons()

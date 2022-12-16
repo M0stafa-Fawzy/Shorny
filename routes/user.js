@@ -8,11 +8,19 @@ const {
     verifyUser,
     getUserProfileByID
 } = require("../controllers/user")
-const { auth } = require("../src/middleware/auth")
+const {
+    auth,
+    isUser,
+    isLawyer
+} = require("../src/middleware/auth")
 
-router.route('/').post(signup).get(auth, getProfileData).put(auth, updateProfile).delete(auth, deleteAccount)
-router.post("/:id", getUserProfileByID)
+router.route('/')
+    .post(signup)
+    .get(auth, getProfileData)
+    .put(auth, updateProfile)
+    .delete(auth, deleteAccount)
 router.post("/login", login)
 router.post("/verify", verifyUser)
+router.post("/:id", getUserProfileByID)
 
 module.exports = router

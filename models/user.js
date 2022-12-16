@@ -19,7 +19,7 @@ const userSchema = new mongoose.Schema({
         minlength: 11,
         validate(value) {
             if (!validator.isMobilePhone(value, ['ar-EG'])) {
-                throw new Error("Please Enter a Correct Phone Number")
+                throw new CustomError("Please Enter a Correct Phone Number", 400)
             }
         }
     },
@@ -35,7 +35,7 @@ const userSchema = new mongoose.Schema({
         trim: true,
         validate(value) {
             if (!validator.isEmail(value)) {
-                throw new Error("It'S not an Email, Please Enter a Correct One")
+                throw new CustomError("It's not an Email, Please Enter a Correct One", 400)
             }
         }
     },
@@ -55,14 +55,20 @@ const userSchema = new mongoose.Schema({
     },
     specialize: {
         type: String,
-        required: () => {
-            return role == 'lawyer'
+        required: function () {
+            return this.role == 'lawyer'
         },
     },
     rate: {
         type: Number,
         defauth: 0
     },
+    status: {
+        type: String,
+        required: true,
+        default: 'pending',
+        enum: ['pending', 'verified']
+    }
 }, { timestamps: true })
 
 userSchema.virtual('concultations', { // or any aonther name
@@ -73,8 +79,8 @@ userSchema.virtual('concultations', { // or any aonther name
     foreignField: 'client'
 })
 
-userSchema.methods.authToken = async function () {
-    const token = jwt.sign({ id: this._id.toString() }, process.env.SECRET_JWT_KEY)
+userSchema.methods.authToken = function () {
+    const token = jwt.sign({ id: this._id.toString(), role: this.role }, process.env.SECRET_JWT_KEY)
     return token
 }
 
@@ -90,7 +96,7 @@ userSchema.statics.findByAlternatives = async (email, password) => {
     if (!user) {
         throw new CustomError("User Doesn't Exist!", 401)
     }
-    const match = bcrypt.compare(password, user.password)
+    const match = await bcrypt.compare(password, user.password)
     if (!match) {
         throw new CustomError("Wrong Password!. Please Confirm Password", 401)
     }
@@ -98,8 +104,16 @@ userSchema.statics.findByAlternatives = async (email, password) => {
 }
 
 userSchema.pre('save', async function (next) {
+    if (this.role == 'user') {
+        this.specialize = null;
+        this.rate = null
+    }
+    next()
+})
+
+userSchema.pre('save', async function (next) {
     if (this.isModified('password')) {
-        this.password = bcrypt.hash(this.password, 8)
+        this.password = await bcrypt.hash(this.password, 8)
     }
     next()
 })

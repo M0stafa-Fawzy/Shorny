@@ -1,15 +1,19 @@
 const sgMail = require('@sendgrid/mail')
-const users = require('../../models/user')
+const { CustomError } = require('../utils/errors')
 
 sgMail.setApiKey(process.env.SENDGRID_API)
 
 const registerMail = (email, name) => {
-    sgMail.send({
-        to: email,
-        from: 'mostafafawzy471@gmail.com',
-        subject: 'Thanks for registering on our site',
-        text: 'Welcome to our app ' + name + '.'
-    })
+    try {
+        return sgMail.send({
+            to: email,
+            from: 'mostafafawzy471@gmail.com',
+            subject: 'Thanks for registering on our site',
+            text: 'Welcome to our app ' + name + '.'
+        })
+    } catch (error) {
+        throw new CustomError(error.message, 500)
+    }
 }
 
 
