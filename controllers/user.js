@@ -102,10 +102,9 @@ const forgetPassword = async (req, res, next) => {
         let user = await User.findOne({ email: email })
         if (!user) throw new CustomError("user not found", 401)
 
-        const otp = generateOTP()
         user = await User.findOneAndUpdate(
             email,
-            { otp },
+            { otp: generateOTP(), status: 'pending' },
             { new: true, runValidators: true }
         )
 
@@ -121,8 +120,8 @@ const getUserProfileByID = async (req, res, next) => {
         const { id } = req.params
         const user = await User.findById(id)
 
-        if (!user) throw new CustomError("user doesn't found", 400)
-        return res.status(200).jsoon({ user })
+        if (!user) throw new CustomError("user not found", 400)
+        return res.status(200).json({ user })
     } catch (error) {
         next(error)
     }
