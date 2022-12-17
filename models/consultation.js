@@ -1,5 +1,5 @@
 const mongoose = require('mongoose')
-const replies = require('./replies')
+const replies = require('./reply')
 
 const consultationSchema = new mongoose.Schema({
     user: {

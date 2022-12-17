@@ -5,12 +5,12 @@ const {
     getSingleConsultation,
     updateConsultation,
     deleteConsultation,
-    likeORdisLikeConsultation
+    likeORdisLikeConsultation,
+    getAllRepliesByConsultationID
 } = require("../controllers/consultation")
 const {
     auth,
-    isUser,
-    isLawyer
+    isUser
 } = require('../src/middleware/auth')
 
 router.use(auth)
@@ -24,6 +24,7 @@ router.route("/:conID")
     .delete(deleteConsultation)
 
 router.post("/action", likeORdisLikeConsultation)
+router.post("/replies/:conID", getAllRepliesByConsultationID)
 
 module.exports = router
 

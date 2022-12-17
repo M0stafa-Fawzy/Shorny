@@ -102,11 +102,24 @@ const likeORdisLikeConsultation = async (req, res, next) => {
     }
 }
 
+const getAllRepliesByConsultationID = async (req, res, next) => {
+    try {
+        const { conID } = req.params
+        if (!conID) throw new CustomError("consultaion id is required", 400)
+
+        const replies = await Reply.find({ consultation: conID })
+        return res.status(200).json({ replies })
+    } catch (error) {
+        next(error)
+    }
+}
+
 module.exports = {
     createConsultation,
     getMyConsultation,
     getSingleConsultation,
     updateConsultation,
     deleteConsultation,
-    likeORdisLikeConsultation
+    likeORdisLikeConsultation,
+    getAllRepliesByConsultationID
 }
