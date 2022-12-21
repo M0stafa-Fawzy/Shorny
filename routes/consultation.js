@@ -13,17 +13,16 @@ const {
     isUser
 } = require('../src/middleware/auth')
 
-router.use(auth)
 router.route('/')
-    .post(isUser, createConsultation)
-    .get(getMyConsultation)
+    .post(auth, isUser, createConsultation)
+    .get(auth, getMyConsultation)
 
 router.route("/:conID")
     .get(getSingleConsultation)
-    .put(updateConsultation)
-    .delete(deleteConsultation)
+    .put(auth, updateConsultation)
+    .delete(auth, deleteConsultation)
 
-router.post("/action", likeORdisLikeConsultation)
+router.post("/action/:conID", auth, likeORdisLikeConsultation)
 router.post("/replies/:conID", getAllRepliesByConsultationID)
 
 module.exports = router

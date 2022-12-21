@@ -13,6 +13,7 @@ const consultationSchema = new mongoose.Schema({
     },
     likes: [{
         userId: {
+            unique: true,
             type: mongoose.Schema.Types.ObjectId,
             ref: 'user',
         }
@@ -42,6 +43,15 @@ consultationSchema.pre('remove', async function (next) {
     next()
 })
 
+consultationSchema.methods.addAction = async function (value, id) {
+    if (value == true) {
+        console.log({ id });
+        this.likes = this.likes.push({ userId: new require("mongoose").Types.ObjectId(id) })
+    } else if (value == false) {
+        this.dislikes = this.dislikes.push({ userId: id })
+    } else { }
+    await this.save()
+}
 
 const Consultation = mongoose.model('consultation', consultationSchema)
 

@@ -36,7 +36,9 @@ const getSingleConsultation = async (req, res, next) => {
         const { conID } = req.params
         if (!conID) throw new CustomError("consultation ID is not provided", 400)
 
-        const con = await Consultation.findOne({ _id: conID })
+        const con = await Consultation.findOne({ _id: conID }).populate("user", "username")
+        if (!con) throw new CustomError("consultation not found", 400)
+
         return res.status(200).json({ con })
     } catch (error) {
         next(error)
@@ -55,6 +57,10 @@ const updateConsultation = async (req, res, next) => {
             { law_type, body, title },
             { new: true, runValidators: true }
         )
+
+        if (!con) {
+            throw new CustomError("consultation not updated. it may be deleted or it does not belong to you", 400)
+        }
         return res.status(200).json({ con })
     } catch (error) {
         next(error)
@@ -68,6 +74,10 @@ const deleteConsultation = async (req, res, next) => {
         if (!conID) throw new CustomError("consultation ID is not provided", 400)
 
         const con = await Consultation.findOneAndDelete({ _id: conID, user: id })
+        if (!con) {
+            throw new CustomError("consultation not deleted. it may be alredy deleted or it does not belong to you", 400)
+        }
+
         return res.status(200).json({ message: 'deleted', con })
     } catch (error) {
         next(error)
@@ -82,17 +92,19 @@ const likeORdisLikeConsultation = async (req, res, next) => {
         if (!conID) throw new CustomError("consultation ID is not provided", 400)
 
         if (value == true) {
-            const con = await Consultation.findByIdAndUpdate(
-                conID,
-                { likes: likes.concat({ userId: id }) },
-                { new: true, runValidators: true }
-            )
+            const con = await Consultation.findById(conID)
+            // await con.addAction(value, id)
+            // const con = await Consultation.findByIdAndUpdate(
+            //     conID,
+            //     { likes: this.likes.push({ userId: id }) },
+            //     { new: true, runValidators: true }
+            // )
             return res.status(200).json({ con })
         }
         else {
             const con = await Consultation.findByIdAndUpdate(
                 conID,
-                { likes: likes.concat({ userId: id }) },
+                { dislikes: dislikes.concat({ userId: id }) },
                 { new: true, runValidators: true }
             )
             return res.status(200).json({ con })

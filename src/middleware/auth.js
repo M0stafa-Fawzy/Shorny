@@ -4,12 +4,13 @@ const { CustomError } = require('../utils/errors')
 
 const auth = async (req, res, next) => {
     try {
+        if (!req.header('Authorization')) throw new CustomError('auhorization header is not provided', 401)
         const token = req.header('Authorization').replace('Bearer ', '')
-        if (!token) throw new CustomError('auhorization header is not provided', 401)
+        if (!token) throw new CustomError('auhorization token is not provided', 401)
 
         jwt.verify(token, process.env.SECRET_JWT_KEY, async (err, { id, role }) => {
             if (err) throw new CustomError(`token error is ${err.message}`, 401)
-            // const { id, role } = pay
+
             req.id = id
             req.role = role
 
