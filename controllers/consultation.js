@@ -1,4 +1,5 @@
 const Consultation = require("../models/consultation")
+const Reply = require("../models/reply")
 const { CustomError } = require("../src/utils/errors")
 
 const createConsultation = async (req, res, next) => {
@@ -86,29 +87,16 @@ const deleteConsultation = async (req, res, next) => {
 
 const likeORdisLikeConsultation = async (req, res, next) => {
     try {
-        const { value } = req.body
         const { conID } = req.params
-        const { id } = req
         if (!conID) throw new CustomError("consultation ID is not provided", 400)
 
-        if (value == true) {
-            const con = await Consultation.findById(conID)
-            // await con.addAction(value, id)
-            // const con = await Consultation.findByIdAndUpdate(
-            //     conID,
-            //     { likes: this.likes.push({ userId: id }) },
-            //     { new: true, runValidators: true }
-            // )
-            return res.status(200).json({ con })
-        }
-        else {
-            const con = await Consultation.findByIdAndUpdate(
-                conID,
-                { dislikes: dislikes.concat({ userId: id }) },
-                { new: true, runValidators: true }
-            )
-            return res.status(200).json({ con })
-        }
+        const { value } = req.body
+        if (value != true && value != false) throw new CustomError("value must be true or false", 400)
+
+        const { id } = req
+        const con = await Consultation.findById(conID)
+        await con.addAction(value, id)
+        return res.status(200).json({ con })
     } catch (error) {
         next(error)
     }

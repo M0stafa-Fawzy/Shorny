@@ -4,7 +4,8 @@ const {
     createReply,
     updateReply,
     deleteReply,
-    likeORdisLikeReply
+    likeORdisLikeReply,
+    getAllRepliesByConsultationID
 } = require("../controllers/reply")
 
 router.use(auth)

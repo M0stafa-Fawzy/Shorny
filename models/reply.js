@@ -1,28 +1,46 @@
 const mongoose = require('mongoose')
 
 const replySchema = new mongoose.Schema({
-    body: {
-        type: String,
-    }, likes: [{
-        like: {
-            type: mongoose.Types.ObjectId,
-            ref: 'user'
-        }
-    }], dislikes: [{
-        dislike: {
-            type: mongoose.Types.ObjectId,
-            ref: 'user'
-        }
-    }], owner: {
+    user: {
         type: mongoose.Types.ObjectId,
         ref: 'user'
-    }, consultation: {
+    },
+    body: {
+        type: String,
+        required: true
+    },
+    consultation: {
         type: mongoose.Types.ObjectId,
-        ref: 'consultation'
-    }
+        ref: 'consultation',
+        required: true
+    },
+    likes: [
+        {
+            userId: {
+                type: mongoose.Types.ObjectId,
+                ref: 'user'
+            }
+        }
+    ],
+    dislikes: [
+        {
+            userId: {
+                type: mongoose.Types.ObjectId,
+                ref: 'user'
+            }
+        }
+    ]
 }, { timestamps: true })
 
-const Reply = mongoose.model('reply', replySchema)
+replySchema.methods.addAction = async function (value, id) {
+    if (value == true) {
+        this.likes = this.likes.concat({ userId: new mongoose.Types.ObjectId(id) })
+    } else if (value == false) {
+        this.dislikes = this.dislikes.concat({ userId: new mongoose.Types.ObjectId(id) })
+    } else { }
+    await this.save()
+}
 
+const Reply = mongoose.model('reply', replySchema)
 
 module.exports = Reply

@@ -23,7 +23,7 @@ router.route("/:conID")
     .delete(auth, deleteConsultation)
 
 router.post("/action/:conID", auth, likeORdisLikeConsultation)
-router.post("/replies/:conID", getAllRepliesByConsultationID)
+router.get("/replies/:conID", getAllRepliesByConsultationID)
 
 module.exports = router
 

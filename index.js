@@ -1,5 +1,5 @@
-require('./src/db/mongoose')
 require("dotenv").config()
+require('./src/db/mongoose')
 const express = require('express')
 const app = express()
 const { errorHandler } = require("./src/middleware/errorHandler")
@@ -9,7 +9,7 @@ app.use(express.json())
 const users = require('./routes/user')
 const consultations = require('./routes/consultation')
 const replies = require('./routes/reply')
-const rate = require('./routes/ratting')
+const feedback = require('./routes/feedback')
 
 app.get("/", (req, res) => {
     res.send("<h1>Shorny Application</h1>")
@@ -18,7 +18,7 @@ app.get("/", (req, res) => {
 app.use('/users', users)
 app.use('/consultations', consultations)
 app.use('/replies', replies)
-app.use('/rate', rate)
+app.use('/feedback', feedback)
 app.use(errorHandler)
 
 

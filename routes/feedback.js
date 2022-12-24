@@ -1,4 +1,4 @@
-const Feedback = require('../models/user_feedback')
+const Feedback = require('../models/feedback')
 const User = require('../models/user')
 const { auth } = require('../src/middleware/auth')
 const express = require('express')

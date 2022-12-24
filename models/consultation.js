@@ -3,7 +3,7 @@ const replies = require('./reply')
 
 const consultationSchema = new mongoose.Schema({
     user: {
-        type: mongoose.Schema.Types.ObjectId,
+        type: mongoose.Types.ObjectId,
         required: true,
         ref: 'user'
     },
@@ -11,26 +11,31 @@ const consultationSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    likes: [{
-        userId: {
-            unique: true,
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'user',
+    likes: [
+        {
+            userId: {
+                type: mongoose.Types.ObjectId,
+                ref: 'user',
+            }
         }
-    }]
-    , dislikes: [{
-        userId: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'user',
+    ],
+    dislikes: [
+        {
+            userId: {
+                type: mongoose.Types.ObjectId,
+                ref: 'user',
+            }
         }
-    }],
+    ],
     body: {
         type: String,
         required: true,
-    }, title: {
+    },
+    title: {
         type: String,
         required: true
-    }, ready_Lawyers: [{
+    },
+    ready_Lawyers: [{
         lawyer: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'user',
@@ -39,16 +44,15 @@ const consultationSchema = new mongoose.Schema({
 })
 
 consultationSchema.pre('remove', async function (next) {
-    await replies.deleteMany({ consultation: new mongoose.ObjectId(this._id) })
+    await replies.deleteMany({ consultation: new mongoose.Types.ObjectId(this._id) })
     next()
 })
 
 consultationSchema.methods.addAction = async function (value, id) {
     if (value == true) {
-        console.log({ id });
-        this.likes = this.likes.push({ userId: new require("mongoose").Types.ObjectId(id) })
+        this.likes = this.likes.concat({ userId: new mongoose.Types.ObjectId(id) })
     } else if (value == false) {
-        this.dislikes = this.dislikes.push({ userId: id })
+        this.dislikes = this.dislikes.concat({ userId: new mongoose.Types.ObjectId(id) })
     } else { }
     await this.save()
 }
