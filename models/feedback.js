@@ -25,5 +25,4 @@ const feedbackSchema = new mongoose.Schema({
 
 const FeedBack = mongoose.model('feedback', feedbackSchema)
 
-
 module.exports = FeedBack

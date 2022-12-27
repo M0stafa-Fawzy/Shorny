@@ -1,5 +1,6 @@
 const mongoose = require('mongoose')
-const consultations = require('./consultation')
+const Consultation = require('./consultation')
+const Feedback = require("./feedback")
 const validator = require('validator')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
@@ -119,9 +120,20 @@ userSchema.pre('save', async function (next) {
 })
 
 userSchema.pre('remove', async function (next) {
-    await consultations.deleteMany({ user: this._id })
+    await Consultation.deleteMany({ user: this._id })
     next()
 })
+
+userSchema.methods.rateRatio = async function () {
+    const [rates, count] = await Promise.all([
+        Feedback.find({ lawyer: this._id }),
+        Feedback.countDocuments({ lawyer: this._id })
+    ])
+    let avrRate = 0
+    rates.forEach(value => avrRate += (value.rate) / count)
+    this.rate = avrRate.toFixed(1)
+    await this.save()
+}
 
 const User = mongoose.model('user', userSchema);
 
@@ -145,15 +157,5 @@ module.exports = User
 //     // name of property on consultation i wanna to to make relation with
 //     foreignField : 'lawyer'
 // })
-
-
-// lawyerSchema.methods.rateRatio = async function () {
-//     const rates = await feedback.find({lawyer : this._id})
-//     const count = await feedback.countDocuments({lawyer : this._id})
-//     let avrRate = 0
-//     rates.forEach(value => avrRate += (value.rate) / count)
-//     this.rate = avrRate
-//     await this.save()
-// }
 
 
