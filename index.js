@@ -21,7 +21,7 @@ app.use('/replies', replies)
 app.use('/feedback', feedback)
 app.use(errorHandler)
 
-port = process.env.PORT || 3000
+const port = process.env.PORT || 3000
 try {
     app.listen(port, () => {
         console.log(`running on port ${port}`)
@@ -29,4 +29,3 @@ try {
 } catch (error) {
     console.log(error.message);
 }
-
